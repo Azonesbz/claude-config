@@ -8,7 +8,7 @@ Découper le travail en **tranches petites**, chacune **vérifiable** seule : te
 
 - **Objectif unique** : une intention claire (ex. « valider le formulaire », pas « refonte complète du module »).
 - **Preuve** : au moins un test ciblé, ou une vérification manuelle documentée si la tâche est purement docs/outillage.
-- **Limite de surface** : préférer peu de fichiers métier par tranche (voir **Granularité** dans `pipeline-orchestration.md`).
+- **Limite de surface** : préférer peu de fichiers métier par tranche (voir **Granularité** dans `flow.md`).
 
 ## Ordre recommandé
 

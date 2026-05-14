@@ -1,4 +1,4 @@
-# Pipeline d'orchestration (générique)
+# `/flow` — pipeline d'orchestration
 
 Règle globale **agnostique** : s'applique à tout dépôt (TypeScript, Python, Go, Rust…). L'agent **adapte** les commandes au gestionnaire de paquets et au framework détectés.
 

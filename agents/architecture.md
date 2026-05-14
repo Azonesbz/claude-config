@@ -15,7 +15,7 @@ On sollicite ton avis **avant** un commit (ou une PR) lorsque des chemins nouvea
 ## Sources de vérité (ordre de lecture)
 
 1. **`ARCHITECTURE.md`** à la **racine** du dépôt : structure, flux, intégrations, évolution. Si absent → noter qu'il devra être créé au prochain changement structurel.
-2. Si une section manque ou est floue : la règle **pipeline d'orchestration** globale (`C:\Users\vince\.claude\rules\pipeline-orchestration.md`) — section *Périmètre du dépôt* (alias de zones).
+2. Si une section manque ou est floue : la règle **`/flow`** globale (`C:\Users\vince\.claude\rules\flow.md`) — section *Périmètre du dépôt* (alias de zones).
 3. Le **code existant** dans les dossiers voisins : ne pas inventer une nouvelle convention si le dépôt suit déjà un pattern local.
 
 ---

@@ -13,7 +13,7 @@ $ARGUMENTS
 
 Lis et applique les règles globales suivantes (chemins absolus, valables dans tout projet) :
 
-- `C:\Users\vince\.claude\rules\pipeline-orchestration.md`
+- `C:\Users\vince\.claude\rules\flow.md`
 - `C:\Users\vince\.claude\rules\test-driven-development.md`
 - `C:\Users\vince\.claude\rules\code-organization.md`
 - `C:\Users\vince\.claude\rules\code-review-and-quality.md`

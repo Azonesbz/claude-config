@@ -65,7 +65,7 @@ Si plusieurs intentions distinctes sont dans les fichiers : **recommander plusie
    - **Verdict `OK`** : enchaîner avec le message Conventional Commit et le commit.
    - **`OK sous réserve`** : appliquer les ajustements indiqués (déplacements, renommages) **ou** obtenir une **dérogation explicite** de l'utilisateur avant de committer.
    - **`Bloquant`** : **ne pas** committer ; proposer les corrections structurelles, ou demander à l'utilisateur de trancher.
-4. **Si l'outil de délégation n'est pas disponible** : appliquer **toi-même** la même grille que l'agent `architecture` en lisant `ARCHITECTURE.md` à la racine et, à défaut, le tableau des zones dans la règle globale `pipeline-orchestration.md` ; livrer un mini-verdict `OK` / `OK sous réserve` / `Bloquant` avant le commit.
+4. **Si l'outil de délégation n'est pas disponible** : appliquer **toi-même** la même grille que l'agent `architecture` en lisant `ARCHITECTURE.md` à la racine et, à défaut, le tableau des zones dans la règle globale `flow.md` ; livrer un mini-verdict `OK` / `OK sous réserve` / `Bloquant` avant le commit.
 
 **Exception** : commit **exclusivement** `docs` ne touchant **que** `ARCHITECTURE.md` (aucun autre fichier) — la consultation peut se limiter à la **cohérence interne** du document (sections, liens, tableau des zones).
 
