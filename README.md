@@ -15,6 +15,7 @@ Configuration **globale** de [Claude Code](https://docs.claude.com/en/docs/claud
 | `test-driven-development.md` | TDD Red-Green-Refactor, motif Prove-It, **AAA** |
 | `code-organization.md` | Taille fichier (~100 l.), **responsabilité unique** (SRF), fichiers d'entrée fins |
 | `clean-code.md` | Granularité **fonction** : fn courtes, ≤3 params, flux plat, nommage, pureté |
+| `scalability-and-boundaries.md` | **Frontières** & échelle : couplage, dépendances dirigées, N+1, pagination, ouvert/fermé |
 | `code-review-and-quality.md` | Revue finale en **5 axes** (comportement, sécurité, maintenabilité, perf, UX) |
 
 ### 🤖 Sous-agents (`agents/`)
