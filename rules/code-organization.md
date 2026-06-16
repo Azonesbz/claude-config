@@ -4,7 +4,7 @@
 
 Lors de l'édition ou de l'ajout de code, respecter :
 
-1. **~100 lignes max par fichier** (sauf exception documentée en en-tête : config, schéma, généré). Adapter le seuil aux conventions du dépôt si celles-ci sont explicites (`.editorconfig`, lint rules, `ARCHITECTURE.md`).
+1. **~100 lignes max par fichier** (sauf exception documentée en en-tête : config, schéma, généré). Adapter le seuil aux conventions du dépôt si celles-ci sont explicites (`.editorconfig`, lint rules, `CLAUDE.md`).
 2. **Une fonctionnalité = un module** (un composant, un hook, un service, un package). Ne pas mélanger plusieurs blocs logiques distincts dans le même fichier.
 
 Si un fichier dépasse 100 lignes ou regroupe plusieurs fonctionnalités : extraire en sous-modules, hooks ou utils (voir l'agent **factorizer** pour la méthode).

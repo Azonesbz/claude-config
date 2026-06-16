@@ -22,7 +22,6 @@ Configuration **globale** de [Claude Code](https://docs.claude.com/en/docs/claud
 
 | Agent | Rôle |
 |-------|------|
-| `architecture` | Valide le **placement** des fichiers selon les zones du dépôt |
 | `factorizer` | **Découpe** les fichiers trop gros (≤100 l., 1 module = 1 responsabilité) |
 | `test-builder` | Écrit les **tests avant** le code (TDD) |
 | `test-runner` | **Lance et diagnostique** la suite de tests |
