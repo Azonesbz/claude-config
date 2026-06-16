@@ -113,15 +113,11 @@ Les messages de commit **doivent** respecter [Conventional Commits v1.0.0](https
 
 Champ optionnel par tâche dans le fil : **`commitType`** (ex. `"feat"`) pour figer le type avant de rédiger le message de **`commit`**.
 
-## Document d'architecture : `ARCHITECTURE.md`
+## Document d'architecture : `ARCHITECTURE.md` — **abandonné**
 
-Fichier à la **racine**. **Créer** au premier plan qui impacte la structure ou un flux majeur, si absent. Squelette : **Contexte** → **Structure** (zones du dépôt, dossiers principaux) → **Flux** (auth, navigation, données) → **Intégrations** (services externes, BDD, CI…) → **Évolution** (changelog daté : *ajouté / modifié / déprécié*, chemins).
+**Ne plus créer ni maintenir `ARCHITECTURE.md`.** Le fichier a été retiré du dépôt : son changelog daté (chaque PR ajoutant une ligne au même endroit) était une source récurrente de **conflits de merge**, et un doublon de l'historique git + des descriptions de PR. **Aucune** tâche `docs(architecture)` ni entrée changelog ajoutée dans une PR.
 
-Quand la demande / le plan **modifie** la structure ou un flux documenté : **dernière tâche** du plan — inclure `ARCHITECTURE.md` dans **`files`**, `commit` en `docs(scope): …` (ex. `docs(architecture): …`). Option dans le fil : **`architectureImpact`** pour l'entrée *Évolution*.
-
-**Agents Claude Code** : avant tout `git commit`, l'agent **`conventional-commit`** s'appuie sur l'agent **`architecture`** pour vérifier que les fichiers staged ont une **place cohérente** dans le dépôt (`ARCHITECTURE.md` + zones inférées). Verdict **Bloquant** → ne pas committer sans correction ou dérogation explicite.
-
-Mettre à jour **`ARCHITECTURE.md`** si impact structurel (frontières, dossiers, flux) — souvent via une tâche `docs` finale, **décidée par l'agent** selon la demande.
+**Ignorer toute autre mention d'`ARCHITECTURE.md`** ailleurs dans cette règle (tableau de mapping des types, exceptions « tâche docs `ARCHITECTURE.md` », règles absolues, agents `architecture`) : elles sont **caduques**. Le **contexte du dépôt** se déduit directement du code et de `CLAUDE.md` ; le **suivi** des changements vit dans l'historique git et les descriptions de PR.
 
 ## Étape 1 — Formuler le plan (dans le fil uniquement)
 
