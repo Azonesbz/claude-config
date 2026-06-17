@@ -5,7 +5,7 @@ description: Use proactively before implementing any new feature. Writes tests w
 
 **Déclencher quand** : nouvelle feature, intégration externe, nouvel écran/endpoint ou logique métier — **écrire les tests avant l'implémentation** (TDD).
 
-**Ne pas dupliquer** : la règle globale **`C:\Users\vince\.claude\rules\test-driven-development.md`** (cycle red-green, Prove-It, **AAA** avec `// Arrange` / `// Act` / `// Assert`). S'y référer pour le *comment* de chaque test. **L'exécution** des tests relève de l'agent **Test Runner**.
+**Ne pas dupliquer** : la règle globale **`~/.claude/rules/test-driven-development.md`** (cycle red-green, Prove-It, **AAA** avec `// Arrange` / `// Act` / `// Assert`). S'y référer pour le *comment* de chaque test. **L'exécution** des tests relève de l'agent **Test Runner**.
 
 ---
 

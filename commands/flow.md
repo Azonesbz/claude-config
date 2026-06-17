@@ -9,17 +9,11 @@ Tu appliques le workflow **pipeline d'orchestration** générique. Adapte les r�
 
 $ARGUMENTS
 
-## Règles à appliquer (à charger via Read avant le plan)
+## Règles à appliquer
 
-Lis et applique les règles globales suivantes (chemins absolus, valables dans tout projet) :
+Les **règles globales** de méthodo sont **déjà chargées** dans chaque session (config globale `~/.claude/rules/`) : `flow`, `test-driven-development`, `code-organization`, `clean-code`, `scalability-and-boundaries`, `code-review-and-quality`, `incremental-implementation`. Les appliquer directement.
 
-- `C:\Users\vince\.claude\rules\flow.md`
-- `C:\Users\vince\.claude\rules\test-driven-development.md`
-- `C:\Users\vince\.claude\rules\code-organization.md`
-- `C:\Users\vince\.claude\rules\code-review-and-quality.md`
-- `C:\Users\vince\.claude\rules\incremental-implementation.md`
-
-Si le dépôt courant possède un dossier `.claude/rules/` local (ex. règles métier projet), **charger aussi** ces fichiers — ils **complètent** ou **précisent** les règles globales (priorité au plus spécifique).
+Si le dépôt courant possède un dossier `.claude/rules/` local (ex. règles métier projet), **charger aussi** ces fichiers via Read — ils **complètent** ou **précisent** les règles globales (priorité au plus spécifique).
 
 ## Tes obligations
 
