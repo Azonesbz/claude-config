@@ -28,5 +28,22 @@ foreach ($dir in $dirs) {
     }
 }
 
+# Hooks are shell scripts (not .md); the *.test.sh files stay in the repo
+# (dev-only). Sync the runtime guards into ~/.claude/hooks.
+$hooksSrc = Join-Path $repoRoot "hooks"
+$hooksDst = Join-Path $target "hooks"
+if (Test-Path $hooksSrc) {
+    if (-not (Test-Path $hooksDst)) {
+        New-Item -ItemType Directory -Path $hooksDst | Out-Null
+    }
+    Get-ChildItem -Path $hooksSrc -Filter *.sh -File |
+        Where-Object { $_.Name -notlike "*.test.sh" } |
+        ForEach-Object {
+            $dstFile = Join-Path $hooksDst $_.Name
+            Copy-Item -Path $_.FullName -Destination $dstFile -Force
+            Write-Host "  hooks/$($_.Name)"
+        }
+}
+
 Write-Host ""
 Write-Host "Done. Files synced to $target"

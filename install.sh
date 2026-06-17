@@ -23,5 +23,21 @@ for dir in commands agents rules; do
     done
 done
 
+# Hooks are shell scripts (not .md), must stay executable, and the *.test.sh
+# files stay in the repo (dev-only). Sync the runtime guards into ~/.claude/hooks.
+hooks_src="${repo_root}/hooks"
+hooks_dst="${target}/hooks"
+if [ -d "${hooks_src}" ]; then
+    mkdir -p "${hooks_dst}"
+    for file in "${hooks_src}"/*.sh; do
+        [ -e "${file}" ] || continue
+        name="$(basename "${file}")"
+        case "${name}" in *.test.sh) continue ;; esac
+        cp -f "${file}" "${hooks_dst}/${name}"
+        chmod +x "${hooks_dst}/${name}"
+        echo "  hooks/${name}"
+    done
+fi
+
 echo ""
 echo "Done. Files synced to ${target}"
