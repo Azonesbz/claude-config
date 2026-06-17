@@ -34,6 +34,18 @@ Configuration **globale** de [Claude Code](https://docs.claude.com/en/docs/claud
 |----------|------|
 | `/flow <demande>` | Orchestrateur : plan, branche, PR, exécution TDD par tranches |
 
+### 🛡️ Hooks (`hooks/`) — garde-fous d'enforcement
+
+Hooks `PreToolUse` qui transforment des **règles** de `flow.md` en **blocages** réels (sortie `permissionDecision: deny`). Scripts shell autonomes, sans dépendance forte (`jq`, sinon `python3` ; **fail-open** si aucun n'est présent — jamais de workflow cassé).
+
+| Hook | Bloque | Règle source |
+|------|--------|--------------|
+| `guard-git-add.sh` | `git add -A` / `--all` / `.` | staging ciblé (`flow.md`) |
+| `guard-git-push.sh` | `git push --force` / `--force-with-lease` | pas de force-push sans accord (`flow.md`) |
+| `guard-plan-file.sh` | écrire `plan.json` / `plan.yaml` / `plan.yml` | pas de fichier de plan versionné (`flow.md`) |
+
+Chaque garde a un test AAA (`*.test.sh`, cas bloqué + cas passant) qui **reste dans le repo** et n'est pas déployé. Lancer : `bash hooks/<nom>.test.sh`.
+
 ## Installation
 
 ```bash
@@ -44,7 +56,35 @@ Configuration **globale** de [Claude Code](https://docs.claude.com/en/docs/claud
 .\install.ps1
 ```
 
-Copie `commands/`, `agents/` et `rules/` vers `~/.claude/`. `settings.json` n'est **pas** géré (perso par machine, hors repo).
+Copie `commands/`, `agents/`, `rules/` et `hooks/` vers `~/.claude/`. `settings.json` n'est **pas** géré (perso par machine, hors repo).
+
+### Activer les hooks (une fois, opt-in)
+
+Les hooks ne se déclenchent qu'une fois **enregistrés** dans ton `settings.json` perso — le repo n'y touche pas, tu actives toi-même. Fusionne ce bloc dans `~/.claude/settings.json` :
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/hooks/guard-git-add.sh" },
+          { "type": "command", "command": "$HOME/.claude/hooks/guard-git-push.sh" }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/hooks/guard-plan-file.sh" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+> Windows : les hooks `.sh` requièrent un `bash` accessible (Git Bash / WSL).
 
 ## Modèle à deux niveaux
 
