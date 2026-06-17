@@ -27,6 +27,7 @@ Configuration **globale** de [Claude Code](https://docs.claude.com/en/docs/claud
 | `test-runner` | **Lance et diagnostique** la suite de tests |
 | `verifier` | **Rapport de fin de tâche** : demandé vs livré |
 | `conventional-commit` | Messages **Conventional Commits**, commit + push prudent |
+| `store-deployer` | **Soumet l'app aux stores** (Google Play / App Store) via EAS Submit |
 
 ### ⚡ Commandes (`commands/`)
 
