@@ -106,7 +106,7 @@ Ne pas confondre avec **`scope`** du plan : le *scope* Conventional Commit = dom
 - La **`directive`** résume le *quoi* (fidèle à la demande utilisateur).
 - **`perimeter.areas`** : liste d'alias **déduits du dépôt courant** (ex. pour une app web : `["app", "api", "components"]` ; pour un service Go : `["cmd", "internal/api", "pkg"]`). Préciser le sous-domaine dans la `description` des tâches si besoin. Si une tâche touche une autre zone, l'indiquer dans la liste **`files`** de la tâche et mettre à jour **`perimeter.areas`** dans le fil.
 
-**Alias de zones** : déduire de la structure du dépôt (parcourir le top-level). Utiliser des alias de bon sens (`src`, `app`, `lib`, `components`, `features`, `api`, `tests`, `migrations`, `config`, `assets`, `docs`).
+**Alias de zones** : déduire de la structure du dépôt (parcourir le top-level) et de `CLAUDE.md` si présent. Utiliser des alias de bon sens (`src`, `app`, `lib`, `components`, `features`, `api`, `tests`, `migrations`, `config`, `assets`, `docs`).
 
 En **boucle d'exécution**, cibler les commandes sur les fichiers réellement modifiés dans ces zones (tests, lint) ; les tâches **transversales** peuvent couvrir plusieurs zones explicitement.
 
@@ -132,6 +132,10 @@ Les messages de commit **doivent** respecter [Conventional Commits v1.0.0](https
 | Config outillage / dépôt sans logique métier | `chore` ou `build` |
 
 Champ optionnel par tâche dans le fil : **`commitType`** (ex. `"feat"`) pour figer le type avant de rédiger le message de **`commit`**.
+
+## Pas de document d'architecture versionné
+
+**Ne pas créer de `ARCHITECTURE.md`** (ni équivalent). Son changelog daté — chaque PR ajoutant une ligne au même endroit — générait des **conflits de merge** récurrents et doublonnait l'historique git + les descriptions de PR. Le **contexte du dépôt** se déduit du **code** et de **`CLAUDE.md`** ; le **suivi** des changements vit dans l'historique git et les descriptions de PR.
 
 ## Étape 1 — Formuler le plan (dans le fil uniquement)
 
@@ -195,5 +199,4 @@ Pour chaque tâche du plan, **dans l'ordre** :
 - **Push** : après chaque commit réussi, **toujours** pousser la branche. **Interdit** : `git push --force` et `git push --force-with-lease` sans **demande explicite** de l'utilisateur.
 - **Push refusé** (droits, branche protégée, conflit avec `origin`) : **stopper** le déroulé du plan, **expliquer** dans le chat, **ne pas** enchaîner la tâche suivante tant que le dépôt distant n'est pas aligné (sauf consigne contraire de l'utilisateur).
 - Staging **ciblé** uniquement ; **jamais** `git add -A` pour ce workflow.
-- Suivi du plan **dans le fil** uniquement (aucun artefact de plan versionné).
-                                                                                                                                       
+- Suivi du plan **dans le fil**.
