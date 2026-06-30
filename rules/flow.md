@@ -54,6 +54,26 @@ Si la demande est **insuffisante pour un plan** : **une** question de clarificat
 
 ---
 
+## Source Linear (optionnel)
+
+`/flow` accepte une **référence Linear** dans la demande, en plus (ou à la place) du texte libre :
+
+```text
+/flow VIS-42
+/flow VIS-42 ne pas toucher au cache Redis
+/flow https://linear.app/visibee/issue/VIS-42/...
+```
+
+Quand une référence Linear (`ABC-123` ou URL `linear.app/.../issue/...`) est détectée, l'agent **linear** (voir `~/.claude/agents/linear.md`) :
+
+1. **Lit le ticket** (titre, description, commentaires, sous-tâches) et en tire la **`directive`**, les **critères d'acceptation** et les **références** (identifiant + URL) — c'est la **source du plan**. Tout texte libre ajouté après la référence **précise** ou **contraint** la directive.
+2. **Au démarrage du dev** (après `ok` / `go`, branche + PR créées) : passe le ticket à un état *started* (« In Progress ») et **poste le lien de la PR** en commentaire du ticket.
+3. **En fin de cycle** : propose de passer le ticket à « In Review » / « Done » — **état terminal uniquement sur accord explicite**.
+
+**Prérequis** : un connecteur **MCP Linear** doit être configuré dans la session Claude Code. À défaut, `/flow` continue en **mode normal** (la demande texte sert de directive) et le signale en une phrase. Les **commits et la PR** restent en anglais (footer `Refs: ABC-123` recommandé) ; les **commentaires Linear** peuvent rester en français.
+
+---
+
 ## Pull request
 
 **Identifier la branche d'intégration** du dépôt :
@@ -86,7 +106,7 @@ Ne pas confondre avec **`scope`** du plan : le *scope* Conventional Commit = dom
 - La **`directive`** résume le *quoi* (fidèle à la demande utilisateur).
 - **`perimeter.areas`** : liste d'alias **déduits du dépôt courant** (ex. pour une app web : `["app", "api", "components"]` ; pour un service Go : `["cmd", "internal/api", "pkg"]`). Préciser le sous-domaine dans la `description` des tâches si besoin. Si une tâche touche une autre zone, l'indiquer dans la liste **`files`** de la tâche et mettre à jour **`perimeter.areas`** dans le fil.
 
-**Alias de zones** : déduire de la structure du dépôt (parcourir le top-level). Vérifier `ARCHITECTURE.md` si présent — il documente souvent les zones et leurs responsabilités. Sinon, utiliser des alias de bon sens (`src`, `app`, `lib`, `components`, `features`, `api`, `tests`, `migrations`, `config`, `assets`, `docs`).
+**Alias de zones** : déduire de la structure du dépôt (parcourir le top-level). Utiliser des alias de bon sens (`src`, `app`, `lib`, `components`, `features`, `api`, `tests`, `migrations`, `config`, `assets`, `docs`).
 
 En **boucle d'exécution**, cibler les commandes sur les fichiers réellement modifiés dans ces zones (tests, lint) ; les tâches **transversales** peuvent couvrir plusieurs zones explicitement.
 
@@ -108,20 +128,10 @@ Les messages de commit **doivent** respecter [Conventional Commits v1.0.0](https
 | `api`, `component`, `hook`, `model`, `migration`, `style` (fonctionnel) | `feat` |
 | Correctif de comportement / bug | `fix` |
 | Couverture ou specs uniquement | `test` |
-| `docs`, dont `ARCHITECTURE.md` | `docs` |
+| `docs` | `docs` |
 | Config outillage / dépôt sans logique métier | `chore` ou `build` |
 
 Champ optionnel par tâche dans le fil : **`commitType`** (ex. `"feat"`) pour figer le type avant de rédiger le message de **`commit`**.
-
-## Document d'architecture : `ARCHITECTURE.md`
-
-Fichier à la **racine**. **Créer** au premier plan qui impacte la structure ou un flux majeur, si absent. Squelette : **Contexte** → **Structure** (zones du dépôt, dossiers principaux) → **Flux** (auth, navigation, données) → **Intégrations** (services externes, BDD, CI…) → **Évolution** (changelog daté : *ajouté / modifié / déprécié*, chemins).
-
-Quand la demande / le plan **modifie** la structure ou un flux documenté : **dernière tâche** du plan — inclure `ARCHITECTURE.md` dans **`files`**, `commit` en `docs(scope): …` (ex. `docs(architecture): …`). Option dans le fil : **`architectureImpact`** pour l'entrée *Évolution*.
-
-**Agents Claude Code** : avant tout `git commit`, l'agent **`conventional-commit`** s'appuie sur l'agent **`architecture`** pour vérifier que les fichiers staged ont une **place cohérente** dans le dépôt (`ARCHITECTURE.md` + zones inférées). Verdict **Bloquant** → ne pas committer sans correction ou dérogation explicite.
-
-Mettre à jour **`ARCHITECTURE.md`** si impact structurel (frontières, dossiers, flux) — souvent via une tâche `docs` finale, **décidée par l'agent** selon la demande.
 
 ## Étape 1 — Formuler le plan (dans le fil uniquement)
 
@@ -147,7 +157,7 @@ Objectif : **revue et rollback faciles**, un problème par tâche.
 - Pour chaque tâche, liste **`files`** **exhaustive** des chemins modifiés ou créés. Tout fichier pertinent hors liste ⇒ **nouvelle tâche** ou **mise à jour du plan dans le fil** avant de commiter.
 - **Staging** : `git add` **uniquement** les chemins listés dans **`files`** de la tâche courante, plus le **fichier de lock** utilisé par l'équipe **seulement** si la tâche ajoute ou modifie une dépendance. **Interdit** : `git add -A` ; embarquer d'autres changements non couverts par la tâche.
 
-Résumé : micro-tâches **atomiques** — une tâche = un comportement testable = **un commit** (sauf tâche **exclusivement** `docs` sur **`ARCHITECTURE.md`** sans code testable).
+Résumé : micro-tâches **atomiques** — une tâche = un comportement testable = **un commit** (sauf tâche **exclusivement** `docs` sans code testable).
 
 - Afficher le plan et attendre **`ok`** ou **`go`**.
 
@@ -163,12 +173,12 @@ Résumé : micro-tâches **atomiques** — une tâche = un comportement testable
 Pour chaque tâche du plan, **dans l'ordre** :
 
 1. Annoncer : `→ Tâche N/X : [title]`
-2. **Tests d'abord** — chaque cas en **Arrange – Act – Assert** (commentaires explicites, voir `test-driven-development.md`) — **sauf** tâche **exclusivement** `docs` sur **`ARCHITECTURE.md`** uniquement (pas de tests auto obligatoires).
+2. **Tests d'abord** — chaque cas en **Arrange – Act – Assert** (commentaires explicites, voir `test-driven-development.md`) — **sauf** tâche **exclusivement** `docs` (pas de tests auto obligatoires).
 3. **Tests ciblés** — depuis la **racine** du dépôt, lancer le script `test` (ou équivalent : `pnpm test`, `npm test`, `pytest`, `go test`, `cargo test`…) sur le chemin du fichier ou du dossier. Échec attendu d'abord si les tests existent déjà ; sinon les ajouter puis itérer.
 4. Implémenter le minimum pour faire passer les tests.
 5. Reprendre la même commande test → tout vert (ou ignorer les étapes 3–5 si tâche docs pure).
 6. **Type-check** : commande adaptée (`npx tsc --noEmit`, `mypy`, `go vet`, `cargo check`…) selon l'écosystème ; zéro erreur avant commit.
-7. **Recommandé** : `lint` du projet (script `lint` du `package.json`, `ruff`, `clippy`, etc.), sauf tâche uniquement `docs` sur **`ARCHITECTURE.md`** sans autre fichier code.
+7. **Recommandé** : `lint` du projet (script `lint` du `package.json`, `ruff`, `clippy`, etc.), sauf tâche uniquement `docs` sans autre fichier code.
 8. **Mettre à jour le plan dans le fil** : tâche courante `status` **`pending` → `done`**. Puis `git add` **ciblé** (chemins `files` + le **lock** des dépendances uniquement s'il a changé), puis `git commit -m "<commit de la tâche>"` (message **Conventional Commits**).
 9. `git push` vers **`origin`** sur la **branche courante** (`HEAD`). Si pas d'upstream : `git push -u origin <nom-de-branche>`.
 10. **Terminé** — tâche N commitée et poussée ; passage à N+1.
@@ -185,4 +195,5 @@ Pour chaque tâche du plan, **dans l'ordre** :
 - **Push** : après chaque commit réussi, **toujours** pousser la branche. **Interdit** : `git push --force` et `git push --force-with-lease` sans **demande explicite** de l'utilisateur.
 - **Push refusé** (droits, branche protégée, conflit avec `origin`) : **stopper** le déroulé du plan, **expliquer** dans le chat, **ne pas** enchaîner la tâche suivante tant que le dépôt distant n'est pas aligné (sauf consigne contraire de l'utilisateur).
 - Staging **ciblé** uniquement ; **jamais** `git add -A` pour ce workflow.
-- Suivi du plan **dans le fil** ; **`ARCHITECTURE.md`** à jour lorsque le plan prévoit une tâche **docs** architecture (dernière tâche concernée du plan).
+- Suivi du plan **dans le fil** uniquement (aucun artefact de plan versionné).
+                                                                                                                                       
