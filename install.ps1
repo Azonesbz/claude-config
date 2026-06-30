@@ -1,6 +1,11 @@
 # Sync claude-config repo content into ~/.claude/
 # Usage (PowerShell, depuis la racine du repo) :
 #   .\install.ps1
+#
+# Par défaut, chaque fichier est installé par LIEN SYMBOLIQUE : éditer le repo
+# met à jour ~/.claude/ instantanément, aucune re-synchro nécessaire.
+# Les liens symboliques sous Windows requièrent le "Mode développeur" (Windows 10+)
+# ou une session admin. Sinon, repli automatique sur la COPIE (relancer après chaque modif).
 
 $ErrorActionPreference = "Stop"
 
@@ -9,6 +14,17 @@ $target = Join-Path $env:USERPROFILE ".claude"
 
 if (-not (Test-Path $target)) {
     New-Item -ItemType Directory -Path $target | Out-Null
+}
+
+function Install-File($src, $dst, $name) {
+    if (Test-Path $dst) { Remove-Item $dst -Force }
+    try {
+        New-Item -ItemType SymbolicLink -Path $dst -Target $src -ErrorAction Stop | Out-Null
+        Write-Host "  link  $name"
+    } catch {
+        Copy-Item -Path $src -Destination $dst -Force
+        Write-Host "  copy  $name"
+    }
 }
 
 $dirs = @("commands", "agents", "rules")
@@ -22,9 +38,7 @@ foreach ($dir in $dirs) {
     }
 
     Get-ChildItem -Path $src -Filter *.md -File | ForEach-Object {
-        $dstFile = Join-Path $dst $_.Name
-        Copy-Item -Path $_.FullName -Destination $dstFile -Force
-        Write-Host "  $dir/$($_.Name)"
+        Install-File $_.FullName (Join-Path $dst $_.Name) "$dir/$($_.Name)"
     }
 }
 
@@ -39,9 +53,7 @@ if (Test-Path $hooksSrc) {
     Get-ChildItem -Path $hooksSrc -Filter *.sh -File |
         Where-Object { $_.Name -notlike "*.test.sh" } |
         ForEach-Object {
-            $dstFile = Join-Path $hooksDst $_.Name
-            Copy-Item -Path $_.FullName -Destination $dstFile -Force
-            Write-Host "  hooks/$($_.Name)"
+            Install-File $_.FullName (Join-Path $hooksDst $_.Name) "hooks/$($_.Name)"
         }
 }
 

@@ -60,7 +60,7 @@ Chaque garde a un test AAA (`*.test.sh`, cas bloqué + cas passant) qui **reste 
 .\install.ps1
 ```
 
-Copie `commands/`, `agents/`, `rules/` et `hooks/` vers `~/.claude/`. `settings.json` n'est **pas** géré (perso par machine, hors repo).
+Installe `commands/`, `agents/`, `rules/` et `hooks/` dans `~/.claude/` par **lien symbolique** (éditer le repo met à jour la config instantanément) ; repli automatique sur la **copie** si les liens ne sont pas supportés (Windows sans « Mode développeur » ni admin — relancer alors le script après chaque modif). `settings.json` n'est **pas** géré (perso par machine, hors repo).
 
 ### Activer les hooks (une fois, opt-in)
 
