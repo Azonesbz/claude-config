@@ -50,7 +50,7 @@ L'agent s'appuie sur ces règles pendant la **boucle d'exécution** (tests d'abo
 
 Si la demande est **insuffisante pour un plan** : **une** question de clarification courte ; pas de taxonomie imposée à l'utilisateur.
 
-**Après le plan** : attendre explicitement **`ok`** ou **`go`** avant toute suite (branche, PR, puis développement).
+**Après le plan** : **démarrer directement** la suite (branche, PR, puis développement) — **ne pas attendre** de validation `ok` / `go`. Le plan est affiché pour transparence et traçabilité ; l'utilisateur peut interrompre ou corriger à tout moment. **Seule exception** : si la demande est trop ambiguë pour un plan fiable, poser **une** question courte **avant** de démarrer.
 
 ---
 
@@ -67,7 +67,7 @@ Si la demande est **insuffisante pour un plan** : **une** question de clarificat
 Quand une référence Linear (`ABC-123` ou URL `linear.app/.../issue/...`) est détectée, l'agent **linear** (voir `~/.claude/agents/linear.md`) :
 
 1. **Lit le ticket** (titre, description, commentaires, sous-tâches) et en tire la **`directive`**, les **critères d'acceptation** et les **références** (identifiant + URL) — c'est la **source du plan**. Tout texte libre ajouté après la référence **précise** ou **contraint** la directive.
-2. **Au démarrage du dev** (après `ok` / `go`, branche + PR créées) : passe le ticket à un état *started* (« In Progress ») et **poste le lien de la PR** en commentaire du ticket.
+2. **Au démarrage du dev** (branche + PR créées) : passe le ticket à un état *started* (« In Progress ») et **poste le lien de la PR** en commentaire du ticket.
 3. **En fin de cycle** : propose de passer le ticket à « In Review » / « Done » — **état terminal uniquement sur accord explicite**.
 
 **Prérequis** : un connecteur **MCP Linear** doit être configuré dans la session Claude Code. À défaut, `/flow` continue en **mode normal** (la demande texte sert de directive) et le signale en une phrase. Les **commits et la PR** restent en anglais (footer `Refs: ABC-123` recommandé) ; les **commentaires Linear** peuvent rester en français.
@@ -83,9 +83,9 @@ Quand une référence Linear (`ABC-123` ou URL `linear.app/.../issue/...`) est d
 
 **Interdit** : ouvrir une PR vers `main` quand une branche d'intégration intermédiaire (`dev`, `develop`) existe.
 
-**Ordre imposé** : la **pull request est ouverte avant le développement et les tests** (dès que le plan est validé), pas après la dernière tâche. Les commits et pushes suivants **mettent à jour** cette PR.
+**Ordre imposé** : la **pull request est ouverte avant le développement et les tests** (dès que le plan est affiché), pas après la dernière tâche. Les commits et pushes suivants **mettent à jour** cette PR.
 
-1. **Après `ok` / `go`** : partir d'une branche d'intégration **à jour** (`git fetch`, checkout, pull), puis créer une **branche** dédiée (ex. `feat/<sujet-court-kebab>`, `fix/<sujet-court-kebab>` — **déduit** du plan dans le fil). Ne pas committer directement sur la branche d'intégration / release sans accord.
+1. **Dès le plan affiché** (sans attendre `ok` / `go`) : partir d'une branche d'intégration **à jour** (`git fetch`, checkout, pull), puis créer une **branche** dédiée (ex. `feat/<sujet-court-kebab>`, `fix/<sujet-court-kebab>` — **déduit** du plan dans le fil). Ne pas committer directement sur la branche d'intégration / release sans accord.
 2. **Pousser la branche** pour pouvoir ouvrir la PR : **commit vide** `git commit --allow-empty -m "chore: open PR for /flow workflow"` (ou équivalent d'équipe) — **sans** aucun fichier de plan. Puis `git push -u origin <branche>`.
 3. **Ouvrir tout de suite la PR** vers la branche d'intégration : titre et description **alignés sur la `directive`** (résumé du plan, périmètre). **`gh pr create --base <integration-branch>`** ; **recommandé** : `--draft` tant que le travail n'est pas prêt à review. Sinon : lien de comparaison GitHub/GitLab avec la bonne base.
 4. **Ensuite seulement** : boucle **tâches** (tests, implémentation, commits) — chaque commit reste sur **cette** branche ; **push après chaque commit** (la PR se met à jour automatiquement).
@@ -97,7 +97,7 @@ Quand une référence Linear (`ABC-123` ou URL `linear.app/.../issue/...`) est d
 
 Le workflow s'active lorsque l'utilisateur utilise la **commande `/flow`** avec un **texte de demande** (éventuellement sur les lignes suivantes du même envoi).
 
-→ Plan (fil) → **`ok` / `go`** → branche depuis la branche d'intégration → **PR vers cette branche** → développement & tests (tâches).
+→ Plan (fil) → branche depuis la branche d'intégration → **PR vers cette branche** → développement & tests (tâches). **Pas d'attente de `ok` / `go`** ; seule exception, une question courte si la demande est trop ambiguë.
 
 ## Périmètre du dépôt (`perimeter.areas`)
 
@@ -143,7 +143,7 @@ Avant toute implémentation, **présenter le plan structuré dans la conversatio
 
 **Découpage** : préférer **plusieurs petites tâches** à une grosse (voir **Granularité**). Aucun export JSON obligatoire ; si un gabarit aide l'utilisateur, le montrer **en bloc de code dans le chat** seulement.
 
-Champ optionnel dans le fil : **`branch`** — nom de branche prévu pour la PR ; fixé dès le plan validé.
+Champ optionnel dans le fil : **`branch`** — nom de branche prévu pour la PR ; fixé dès le plan affiché.
 
 ## Granularité des tâches et des commits
 
@@ -163,11 +163,11 @@ Objectif : **revue et rollback faciles**, un problème par tâche.
 
 Résumé : micro-tâches **atomiques** — une tâche = un comportement testable = **un commit** (sauf tâche **exclusivement** `docs` sans code testable).
 
-- Afficher le plan et attendre **`ok`** ou **`go`**.
+- Afficher le plan, puis **démarrer directement** — **pas d'attente** de `ok` / `go` (sauf demande ambiguë : une question courte).
 
 ## Étape 1bis — Pull request (avant dev & tests)
 
-**Uniquement après `ok` / `go`**, et **avant** la première itération de la boucle ci-dessous :
+**Dès le plan affiché** (sans attendre `ok` / `go`), et **avant** la première itération de la boucle ci-dessous :
 
 1. Branche d'intégration à jour → création de la branche du plan → push initial (voir section **Pull request**).
 2. **Ouvrir la PR** vers la branche d'intégration (`gh pr create --base <integration>`, idéalement en **draft**).
