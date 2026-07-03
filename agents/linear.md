@@ -56,7 +56,7 @@ Ne pas inventer de critères absents du ticket ; si la description est trop maig
 
 Suivre le cycle `/flow` :
 
-1. **Au démarrage du dev** (après `ok` / `go`, branche + PR créées) : passer l'issue à un état **« In Progress »** (ou équivalent du workflow de l'équipe — choisir l'état *started* le plus proche). **Annoncer** le changement dans le fil.
+1. **Au démarrage du dev** (dès le plan affiché, branche + PR créées — **sans** attendre `ok` / `go`) : passer l'issue à un état **« In Progress »** (ou équivalent du workflow de l'équipe — choisir l'état *started* le plus proche). **Annoncer** le changement dans le fil.
 2. **Après ouverture de la PR** : ajouter un **commentaire** sur l'issue avec le **lien de la PR** (et le nom de branche). Un seul commentaire ; le compléter plutôt que d'en empiler.
 3. **En fin de cycle** (toutes les tâches du plan terminées, PR prête) : proposer de passer l'issue à **« In Review »** / **« Done »** selon la convention de l'équipe — **demander confirmation** avant tout passage en état *terminal* (Done/Closed) ; ne jamais clôturer un ticket sans accord explicite.
 

@@ -50,7 +50,7 @@ L'agent s'appuie sur ces règles pendant la **boucle d'exécution** (tests d'abo
 
 Si la demande est **insuffisante pour un plan** : **une** question de clarification courte ; pas de taxonomie imposée à l'utilisateur.
 
-**Après le plan** : **démarrer directement** la suite (branche, PR, puis développement) — **ne pas attendre** de validation `ok` / `go`. Le plan est affiché pour transparence et traçabilité ; l'utilisateur peut interrompre ou corriger à tout moment. **Seule exception** : si la demande est trop ambiguë pour un plan fiable, poser **une** question courte **avant** de démarrer.
+**Après le plan** : **démarrer directement** la suite (branche, PR, puis développement) — **jamais** de confirmation `ok` / `go` / « je continue ? », ni d'aval implicite attendu. Le plan est affiché pour transparence et traçabilité ; l'utilisateur peut interrompre ou corriger à tout moment. **Seule exception** (dernier recours, rare) : si la demande est **inactionnable** telle quelle (impossible d'en tirer un plan fiable), poser **une** question courte, **une** seule, puis enchaîner sur la réponse. En cas de doute qui n'empêche pas d'avancer : **choisir l'option la plus raisonnable**, l'indiquer en une ligne, et continuer.
 
 ---
 
@@ -163,8 +163,6 @@ Objectif : **revue et rollback faciles**, un problème par tâche.
 
 Résumé : micro-tâches **atomiques** — une tâche = un comportement testable = **un commit** (sauf tâche **exclusivement** `docs` sans code testable).
 
-- Afficher le plan, puis **démarrer directement** — **pas d'attente** de `ok` / `go` (sauf demande ambiguë : une question courte).
-
 ## Étape 1bis — Pull request (avant dev & tests)
 
 **Dès le plan affiché** (sans attendre `ok` / `go`), et **avant** la première itération de la boucle ci-dessous :
@@ -183,11 +181,29 @@ Pour chaque tâche du plan, **dans l'ordre** :
 5. Reprendre la même commande test → tout vert (ou ignorer les étapes 3–5 si tâche docs pure).
 6. **Type-check** : commande adaptée (`npx tsc --noEmit`, `mypy`, `go vet`, `cargo check`…) selon l'écosystème ; zéro erreur avant commit.
 7. **Recommandé** : `lint` du projet (script `lint` du `package.json`, `ruff`, `clippy`, etc.), sauf tâche uniquement `docs` sans autre fichier code.
+7bis. **Preuve visuelle — tâches UI mobile uniquement** : si la tâche touche un **écran / composant / navigation mobile** (Expo / React Native), déléguer à l'agent **mobile-preview** (Agent tool, `subagent_type="mobile-preview"`) pour **booter un simulateur/émulateur**, ouvrir l'écran concerné et **capturer un screenshot**. La capture est affichée dans le fil (et attachée au ticket Linear si c'est la source) — **jamais commitée**. Étape **best-effort** : un échec d'environnement (pas de simulateur) est signalé mais **ne bloque pas** le commit. Ignorer pour toute tâche non visuelle (logique pure, config, docs).
 8. **Mettre à jour le plan dans le fil** : tâche courante `status` **`pending` → `done`**. Puis `git add` **ciblé** (chemins `files` + le **lock** des dépendances uniquement s'il a changé), puis `git commit -m "<commit de la tâche>"` (message **Conventional Commits**).
 9. `git push` vers **`origin`** sur la **branche courante** (`HEAD`). Si pas d'upstream : `git push -u origin <nom-de-branche>`.
 10. **Terminé** — tâche N commitée et poussée ; passage à N+1.
 
-**Fin de cycle `/flow`** : la PR existe **déjà** ; après la dernière tâche, **finaliser** (retirer le draft si besoin, compléter la description : **`directive`**, `perimeter.areas`, tests manuels, risques).
+**Fin de cycle `/flow`** : la PR existe **déjà** ; après la dernière tâche, lancer **automatiquement** (sans confirmation) la **passe qualité finale** ci-dessous, puis **finaliser** (retirer le draft si besoin, compléter la description : **`directive`**, `perimeter.areas`, tests manuels, risques, **preuve visuelle mobile** le cas échéant).
+
+## Preuve visuelle — dev mobile (simulateur + screenshot)
+
+Pour toute tâche touchant l'**UI mobile** (Expo / React Native), la **preuve** que le rendu fonctionne est un **screenshot** pris sur simulateur/émulateur — pas seulement des tests verts. C'est l'axe de l'agent **mobile-preview** (`~/.claude/agents/mobile-preview.md`), déclenché à l'**étape 7bis** de la boucle :
+
+- **Boot** de la cible dispo selon l'OS hôte : simulateur **iOS** (macOS uniquement, `xcrun simctl` / `expo run:ios`), sinon émulateur **Android** (`adb` / `expo run:android`).
+- **Capture** dans le **scratchpad de session** (`xcrun simctl io booted screenshot` / `adb exec-out screencap -p`), **relue** pour validation visuelle, **affichée** dans le fil.
+- **Jamais commitée** : ni le screenshot, ni les artefacts de build (`.ipa` / `.apk`). Source **Linear** → l'agent **linear** l'attache au ticket.
+- **Best-effort** : absence de simulateur = preuve « non capturée », **sans bloquer** le flux.
+
+## Passe qualité finale (automatique, sans confirmation)
+
+Avant de retirer le draft de la PR, exécuter **sans demander d'aval** (c'est de la vérification interne, pas de la friction utilisateur) :
+
+1. **Revue cinq axes** (`code-review-and-quality.md`) sur le diff cumulé de la branche : comportement, sécurité, maintenabilité, performance, UX. Toute case « non » → corriger (tâche/commit dédié) **ou** la justifier explicitement dans la description de PR (risque accepté / follow-up).
+2. **Agent verifier** (`subagent_type="verifier"`) : rapport succès / incomplet ; tests + lint + build relancés une dernière fois à la racine.
+3. **UI mobile** : confirmer qu'au moins **une preuve visuelle** (agent **mobile-preview**) couvre les écrans modifiés — sinon la produire maintenant.
 
 ## Règles absolues
 
