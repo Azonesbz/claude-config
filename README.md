@@ -4,6 +4,29 @@ Marketplace **privée** de plugins [Claude Code](https://docs.claude.com/en/docs
 
 > Ce repo est la **source de vérité versionnée**. Claude Code le clone lui-même quand un membre installe le plugin — plus rien à copier à la main dans `~/.claude/`.
 
+## ⚠️ Migration — à faire d'abord si tu as déjà lancé `install.sh`
+
+L'ancien `install.sh` **copiait** `rules/`, `agents/` et `commands/` dans `~/.claude/` sans jamais rien supprimer. Ces copies sont toujours là, **figées** à la version d'avant la migration, et Claude Code charge `~/.claude/rules/` **d'office dans chaque session**.
+
+Si tu installes le plugin sans nettoyer, tu obtiens la méthodo **en double** : les 7 anciennes règles toujours chargées en permanence (~10k tokens), plus l'index du plugin, plus la skill quand elle se charge. Le bénéfice du plugin est annulé, et **rien ne te le signale** — l'install a l'air réussie.
+
+```bash
+# macOS / Linux
+rm -rf ~/.claude/rules
+rm -f ~/.claude/commands/flow.md
+rm -f ~/.claude/agents/{conventional-commit,factorizer,test-builder,test-runner,verifier}.md
+```
+
+```powershell
+# Windows (PowerShell)
+Remove-Item -Recurse -Force ~/.claude/rules
+Remove-Item -Force ~/.claude/commands/flow.md
+'conventional-commit','factorizer','test-builder','test-runner','verifier' |
+  ForEach-Object { Remove-Item -Force "~/.claude/agents/$_.md" }
+```
+
+Rien n'est perdu : ces fichiers sont l'ancien contenu de ce repo, récupérable dans l'historique git. À faire **sur chaque machine** ayant lancé `install.sh`.
+
 ## Installation (chaque membre de l'équipe)
 
 **Prérequis** : avoir accès au repo (repo privé) et être authentifié auprès de GitHub — `gh auth login`, ou une clé SSH chargée dans `ssh-agent`. Claude Code réutilise tes identifiants git existants, il n'y a **aucun token à saisir**.
@@ -70,11 +93,10 @@ plugins/dev-methodology/
 ├── commands/flow.md              ← auto-découverte
 └── hooks/
     ├── hooks.json                ← déclare le hook SessionStart
-    ├── methodology-index.md      ← l'index injecté (éditer ici)
-    └── methodology-index.mjs     ← l'encode en JSON pour Claude Code
+    └── methodology-index.md      ← l'index injecté (éditer ici)
 ```
 
-Le hook tourne en **forme exec** (`node` + `args`) : pas de shell, donc comportement identique sur Windows, macOS et Linux, et pas de bit exécutable à préserver.
+Le hook est un simple `cat` de l'index : `SessionStart` est l'un des trois événements où le **stdout brut** est ajouté au contexte, donc aucun script ni runtime n'est nécessaire. `cat` existe aussi bien dans bash que dans PowerShell (alias de `Get-Content`), ce qui couvre macOS, Linux et Windows.
 
 ## Workflow de modification
 
@@ -82,6 +104,8 @@ Le hook tourne en **forme exec** (`node` + `args`) : pas de shell, donc comporte
 2. `claude plugin validate .` si le CLI est installé
 3. PR → merge sur `main`
 4. Côté équipe, la mise à jour arrive via `/plugin marketplace update claude-config`
+
+`plugin.json` ne déclare **pas** de `version` : c'est volontaire. Sans ce champ, chaque commit compte comme une nouvelle version et les mises à jour partent toutes seules. Si tu l'ajoutes, il faudra le **bumper à chaque release**, sinon l'équipe ne recevra plus rien silencieusement.
 
 Pour tester en local avant de pousser, ajoute le repo comme marketplace par chemin :
 
