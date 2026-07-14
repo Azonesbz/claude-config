@@ -1,3 +1,8 @@
+---
+name: code-review-and-quality
+description: Revue finale en cinq axes avant de considérer une modification terminée — comportement et correction, sécurité et données, maintenabilité, performance et ressources, UX et accessibilité. À charger en fin de tâche, avant un commit, avant de résumer une PR, ou quand on te demande de relire du code.
+---
+
 # Revue et qualité — cinq axes
 
 Avant de considérer une modification **terminée** (ou avant de résumer une PR), parcourir **les cinq axes** ci-dessous. Une case « non » doit être **corrigée** ou **justifiée** explicitement (risque accepté, follow-up ticket).
@@ -18,7 +23,7 @@ Avant de considérer une modification **terminée** (ou avant de résumer une PR
 
 ## 3. Maintenabilité
 
-- Lisibilité, noms cohérents, responsabilités claires (voir aussi `code-organization.md`).
+- Lisibilité, noms cohérents, responsabilités claires (voir aussi skill `code-organization`).
 - Pas de duplication inutile ; réutilisation des utilitaires existants quand c'est pertinent.
 - Types **honnêtes** dans les langages typés (éviter `any` / `interface{}` / `Object` sans raison).
 
@@ -37,3 +42,8 @@ Avant de considérer une modification **terminée** (ou avant de résumer une PR
 
 - **Fin de tâche** : passage rapide sur les cinq axes avant de marquer la tâche comme terminée dans le fil.
 - **PR** : la description peut résumer les axes touchés (ex. surtout sécurité + UX si écran sensible).
+
+## Lien avec les autres règles
+
+- Rapport de fin de tâche (demandé vs livré) → agent **verifier**.
+- Pipeline complet → skill `flow-pipeline` et commande `/flow`.

@@ -1,3 +1,8 @@
+---
+name: incremental-implementation
+description: Découpe du travail en tranches petites et vérifiables — un objectif unique par tranche, une preuve (test ciblé ou vérification manuelle documentée), peu de fichiers métier, ordre contrat → logique → présentation. À charger quand tu planifies une feature, un refactor ou une PR, ou quand une tâche commence à mélanger plusieurs intentions.
+---
+
 # Implémentation incrémentale
 
 ## Principe
@@ -8,7 +13,7 @@ Découper le travail en **tranches petites**, chacune **vérifiable** seule : te
 
 - **Objectif unique** : une intention claire (ex. « valider le formulaire », pas « refonte complète du module »).
 - **Preuve** : au moins un test ciblé, ou une vérification manuelle documentée si la tâche est purement docs/outillage.
-- **Limite de surface** : préférer peu de fichiers métier par tranche (voir **Granularité** dans `flow.md`).
+- **Limite de surface** : préférer peu de fichiers métier par tranche (voir **Granularité** dans la skill `flow-pipeline`).
 
 ## Ordre recommandé
 
@@ -20,7 +25,7 @@ Les tranches peuvent être **verticales** (une fine fonctionnalité bout-en-bout
 
 ## Lien avec TDD
 
-Pour chaque tranche : appliquer le motif **Prove-It** (`test-driven-development.md`) — test qui échoue, puis implémentation minimale. Tout cas de test produit en **Arrange – Act – Assert** avec commentaires explicites (`// Arrange`, etc.) comme dans la même règle.
+Pour chaque tranche : appliquer le motif **Prove-It** (skill `test-driven-development`) — test qui échoue, puis implémentation minimale. Tout cas de test produit en **Arrange – Act – Assert** avec commentaires explicites (`// Arrange`, etc.) comme dans la même règle.
 
 ## Signaux d'alarme
 

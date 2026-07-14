@@ -1,3 +1,8 @@
+---
+name: code-organization
+description: Organisation du code au niveau fichier et module — ~100 lignes max par fichier, une fonctionnalité = un module, fichier à responsabilité unique (SRF), fichiers d'entrée fins (routes, écrans, controllers, handlers), consolidation de l'état local. À charger dès que tu crées un fichier, décides où placer du code, ou touches une route, un écran ou un controller.
+---
+
 # Organisation du code (taille, factorisation, responsabilité)
 
 ## Taille et factorisation
@@ -53,3 +58,8 @@ Anti-pattern fréquent : 6+ `useState` (ou équivalents) qui sont tous remplis d
 - Si tu ajoutes un nouveau module réutilisable : **nouveau fichier** (ou sous-dossier) plutôt qu'un second export massif dans le même module.
 - Si tu étends une primitive existante : **extraire** d'abord la partie stable (types, hook, layout) si le diff devient difficile à relire.
 - Si tu touches un fichier d'entrée qui contient des fonctions utilitaires ou des sous-composants : **extraire d'abord** (commit séparé), puis appliquer le changement.
+
+## Lien avec les autres règles
+
+- Niveau **fonction/ligne** → skill `clean-code` ; **frontières et échelle** → skill `scalability-and-boundaries`.
+- Découpe d'un fichier trop gros → agent **factorizer**.

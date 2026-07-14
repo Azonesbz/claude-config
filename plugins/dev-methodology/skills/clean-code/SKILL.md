@@ -1,6 +1,11 @@
+---
+name: clean-code
+description: Règles de code propre au niveau fonction et ligne — fonctions courtes (~20-30 lignes), une seule intention, ≤3 paramètres, pas de flag booléen, guard clauses, indentation ≤3, nommage révélateur, zéro magic number, pureté et isolation des effets de bord. À charger dès que tu écris, modifies ou relis une fonction, un hook, un service ou un composant.
+---
+
 # Code propre — granularité au niveau fonction
 
-Cette règle **complète** `code-organization.md` (niveau fichier/module) en descendant au niveau **fonction et ligne** : chaque fonction doit être lisible en quelques secondes et porter **une seule intention**. La découpe d'un fichier trop gros relève de l'agent **factorizer** ; ici on vise la **forme interne** du code.
+Cette règle **complète** la skill `code-organization` (niveau fichier/module) en descendant au niveau **fonction et ligne** : chaque fonction doit être lisible en quelques secondes et porter **une seule intention**. La découpe d'un fichier trop gros relève de l'agent **factorizer** ; ici on vise la **forme interne** du code.
 
 ## 1. Fonctions courtes et focalisées
 
@@ -59,7 +64,7 @@ Cette règle **complète** `code-organization.md` (niveau fichier/module) en des
 
 ## Lien avec les autres règles
 
-- Niveau **fichier/module** (taille, SRF, placement) → `code-organization.md` ; découpe d'un gros fichier → agent **factorizer**.
-- **Frontières, couplage et scalabilité** → `scalability-and-boundaries.md`.
-- Chaque test en **Arrange – Act – Assert** → `test-driven-development.md`.
-- Revue finale (5 axes) → `code-review-and-quality.md`.
+- Niveau **fichier/module** (taille, SRF, placement) → skill `code-organization` ; découpe d'un gros fichier → agent **factorizer**.
+- **Frontières, couplage et scalabilité** → skill `scalability-and-boundaries`.
+- Chaque test en **Arrange – Act – Assert** → skill `test-driven-development`.
+- Revue finale (5 axes) → skill `code-review-and-quality`.

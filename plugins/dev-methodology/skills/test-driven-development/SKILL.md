@@ -1,3 +1,8 @@
+---
+name: test-driven-development
+description: TDD et structure des tests — cycle Red/Green/Refactor, motif Prove-It (écrire la preuve avant le code), et pattern Arrange-Act-Assert obligatoire avec commentaires explicites dans chaque cas de test. À charger dès que tu écris un test, ajoutes une feature ou corriges un bug, avant toute implémentation.
+---
+
 # Développement piloté par les tests (TDD)
 
 ## Cycle Red → Green → Refactor
@@ -33,7 +38,7 @@ Contre ce pattern (à éviter) : plusieurs actions « métier » dans le même t
 - **Emplacement des tests** : convention du dépôt courant (`**/__tests__/**`, `tests/`, `*_test.go`, `tests/`…). Lire la config du framework de test pour confirmer le pattern.
 - **Framework de test** : déduit du `package.json` / `pyproject.toml` / `go.mod` / `Cargo.toml` (Jest, Vitest, pytest, Go test, Cargo test, etc.).
 - **Exécution ciblée** : depuis la racine du dépôt, lancer le script `test` du gestionnaire de paquets avec le chemin du test (ex. `pnpm test -- <chemin>`, `pytest <chemin>`, `go test ./<pkg>`, `cargo test <name>`).
-- Pour une tâche **testable** du pipeline `/flow` : **tests d'abord**, puis implémentation (voir `flow.md`, Étape 2).
+- Pour une tâche **testable** du pipeline `/flow` : **tests d'abord**, puis implémentation (voir skill `flow-pipeline`, Étape 2).
 
 ## Anti-patterns
 
@@ -41,3 +46,8 @@ Contre ce pattern (à éviter) : plusieurs actions « métier » dans le même t
 - Implémenter puis « ajouter des tests après » sans laisser le test rouge guider le design.
 - Tests trop larges (tout l'écran d'un coup) : préférer des cas **petits et nommés**.
 - Mocks qui masquent le comportement réel au point que le test ne prouve plus rien.
+
+## Lien avec les autres règles
+
+- Écriture des tests avant le code → agent **test-builder** ; exécution et diagnostic → agent **test-runner**.
+- Découpe en tranches testables → skill `incremental-implementation`.
