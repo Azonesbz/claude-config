@@ -11,9 +11,9 @@ $ARGUMENTS
 
 ## Règles à appliquer
 
-Les **règles globales** de méthodo sont **déjà chargées** dans chaque session (config globale `~/.claude/rules/`) : `flow`, `test-driven-development`, `code-organization`, `clean-code`, `scalability-and-boundaries`, `code-review-and-quality`, `incremental-implementation`. Les appliquer directement.
+La méthodo est livrée sous forme de **skills** par le plugin `dev-methodology`. **Charger `flow-pipeline` dès maintenant** — c'est la doctrine complète du pipeline (plan, PR avant dev, granularité, Conventional Commits, boucle d'exécution). Charger ensuite, au moment où elles servent : `test-driven-development`, `code-organization`, `clean-code`, `scalability-and-boundaries`, `code-review-and-quality`, `incremental-implementation`.
 
-Si le dépôt courant possède un dossier `.claude/rules/` local (ex. règles métier projet), **charger aussi** ces fichiers via Read — ils **complètent** ou **précisent** les règles globales (priorité au plus spécifique).
+Si le dépôt courant possède un dossier `.claude/rules/` local (ex. règles métier projet), **charger aussi** ces fichiers via Read — ils **complètent** ou **précisent** les skills globales (priorité au plus spécifique).
 
 ## Tes obligations
 
