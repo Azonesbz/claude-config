@@ -1,6 +1,11 @@
+---
+name: scalability-and-boundaries
+description: Frontières entre modules et coût à l'échelle — couplage faible, direction des dépendances (le domaine ne dépend pas de l'infra), zéro import circulaire, organisation par domaine, règle de 3 avant d'abstraire, pagination obligatoire, anti N+1, complexité algorithmique, ouvert/fermé. À charger quand tu conçois un module, ajoutes une dépendance, écris une requête ou une boucle sur une collection.
+---
+
 # Scalabilité & frontières — pensé pour grandir
 
-Cette règle **complète** `code-organization.md` (placement) et `clean-code.md` (fonction) au niveau **module / dépendances / données** : chaque fichier doit pouvoir **grandir sans casser** ses voisins. On vise les **frontières** entre modules et le **coût à l'échelle** (équipe, données, trafic).
+Cette règle **complète** la skill `code-organization` (placement) et la skill `clean-code` (fonction) au niveau **module / dépendances / données** : chaque fichier doit pouvoir **grandir sans casser** ses voisins. On vise les **frontières** entre modules et le **coût à l'échelle** (équipe, données, trafic).
 
 ## 1. Couplage faible, cohésion forte
 
@@ -57,6 +62,6 @@ Cette règle **complète** `code-organization.md` (placement) et `clean-code.md`
 
 ## Lien avec les autres règles
 
-- Niveau **fonction/ligne** → `clean-code.md` ; niveau **fichier/placement** → `code-organization.md` ; découpe → agent **factorizer**.
-- Axe **Performance & ressources** de la revue → `code-review-and-quality.md`.
-- Livraison **par tranches** vérifiables → `incremental-implementation.md`.
+- Niveau **fonction/ligne** → skill `clean-code` ; niveau **fichier/placement** → skill `code-organization` ; découpe → agent **factorizer**.
+- Axe **Performance & ressources** de la revue → skill `code-review-and-quality`.
+- Livraison **par tranches** vérifiables → skill `incremental-implementation`.

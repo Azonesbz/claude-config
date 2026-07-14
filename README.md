@@ -1,24 +1,78 @@
 # claude-config
 
-Configuration **globale** de [Claude Code](https://docs.claude.com/en/docs/claude-code) : règles méthodologiques, sous-agents et commandes, partagés entre **tous les projets** et **toutes les machines**.
+Marketplace **privée** de plugins [Claude Code](https://docs.claude.com/en/docs/claude-code) pour l'équipe. Elle expose un plugin, **`dev-methodology`** : la méthodo de dev partagée (règles, agents, pipeline `/flow`).
 
-> Ce repo est la **source de vérité versionnée**. Son contenu est **copié** dans `~/.claude/` par `install.sh` (macOS/Linux) ou `install.ps1` (Windows). Claude Code lit toujours `~/.claude/`, **jamais ce repo directement**.
+> Ce repo est la **source de vérité versionnée**. Claude Code le clone lui-même quand un membre installe le plugin — plus rien à copier à la main dans `~/.claude/`.
 
-## Ce que couvre cette config
+## ⚠️ Migration — à faire d'abord si tu as déjà lancé `install.sh`
 
-### 📐 Règles (`rules/`) — méthodo chargée dans chaque session
+L'ancien `install.sh` **installait** `rules/`, `agents/`, `commands/` et `hooks/` dans `~/.claude/` sans jamais rien supprimer. Ces copies sont toujours là, **figées** à leur version du jour de l'install, et Claude Code charge `~/.claude/rules/` **d'office dans chaque session**.
 
-| Règle | Couvre |
+Si tu installes le plugin sans nettoyer, tout tourne **en double** : les 7 anciennes règles chargées en permanence (~10k tokens) *plus* l'index du plugin *plus* la skill ; les gardes de `~/.claude/hooks/` *plus* ceux du plugin. Le bénéfice du plugin est annulé, la version qui s'applique est l'ancienne, et **rien ne te le signale** — l'install a l'air réussie.
+
+**1. Supprimer les fichiers déployés**
+
+```bash
+# macOS / Linux
+rm -rf ~/.claude/rules ~/.claude/hooks
+rm -f ~/.claude/commands/flow.md
+rm -f ~/.claude/agents/{conventional-commit,factorizer,test-builder,test-runner,verifier,linear,mobile-preview,store-deployer}.md
+```
+
+```powershell
+# Windows (PowerShell)
+Remove-Item -Recurse -Force ~/.claude/rules, ~/.claude/hooks
+Remove-Item -Force ~/.claude/commands/flow.md
+'conventional-commit','factorizer','test-builder','test-runner','verifier','linear','mobile-preview','store-deployer' |
+  ForEach-Object { Remove-Item -Force "~/.claude/agents/$_.md" -ErrorAction SilentlyContinue }
+```
+
+**2. Décâbler les gardes de ton `settings.json`**
+
+Le plugin les câble désormais lui-même. Retire de `~/.claude/settings.json` le bloc `hooks.PreToolUse` qui pointe vers `~/.claude/hooks/guard-*.sh` — sinon les gardes tournent deux fois, et ceux qui répondent sont les copies périmées. Le reste du fichier (`permissions`, etc.) ne bouge pas : ce repo ne gère pas ton `settings.json`.
+
+Rien n'est perdu : ces fichiers sont l'ancien contenu de ce repo, récupérable dans l'historique git. À faire **sur chaque machine** ayant lancé `install.sh`.
+
+## Installation (chaque membre de l'équipe)
+
+**Prérequis** : avoir accès au repo (repo privé) et être authentifié auprès de GitHub — `gh auth login`, ou une clé SSH chargée dans `ssh-agent`. Claude Code réutilise tes identifiants git existants, il n'y a **aucun token à saisir**.
+
+Dans Claude Code :
+
+```
+/plugin marketplace add Azonesbz/claude-config
+/plugin install dev-methodology@claude-config
+```
+
+En SSH plutôt qu'en HTTPS :
+
+```
+/plugin marketplace add git@github.com:Azonesbz/claude-config.git
+```
+
+Vérifier :
+
+```
+/plugin list
+```
+
+## Ce que le plugin apporte
+
+### 📐 Règles — livrées en **skills**
+
+Chargées **à la demande**, quand la règle sert. Un hook `SessionStart` injecte en plus un **index compact** (~500 tokens) des non-négociables, pour qu'aucune règle ne passe à la trappe.
+
+| Skill | Couvre |
 |-------|--------|
-| `flow.md` | Pipeline `/flow` : plan → PR → exécution par tranches |
-| `incremental-implementation.md` | Découpe en **tranches petites et vérifiables** |
-| `test-driven-development.md` | TDD Red-Green-Refactor, motif Prove-It, **AAA** |
-| `code-organization.md` | Taille fichier (~100 l.), **responsabilité unique** (SRF), fichiers d'entrée fins |
-| `clean-code.md` | Granularité **fonction** : fn courtes, ≤3 params, flux plat, nommage, pureté |
-| `scalability-and-boundaries.md` | **Frontières** & échelle : couplage, dépendances dirigées, N+1, pagination, ouvert/fermé |
-| `code-review-and-quality.md` | Revue finale en **5 axes** (comportement, sécurité, maintenabilité, perf, UX) |
+| `flow-pipeline` | Doctrine `/flow` : plan → PR → exécution ; Conventional Commits, granularité, staging |
+| `incremental-implementation` | Découpe en **tranches petites et vérifiables** |
+| `test-driven-development` | TDD Red-Green-Refactor, motif Prove-It, **AAA** |
+| `code-organization` | Taille fichier (~100 l.), **responsabilité unique** (SRF), fichiers d'entrée fins |
+| `clean-code` | Granularité **fonction** : fn courtes, ≤3 params, flux plat, nommage, pureté |
+| `scalability-and-boundaries` | **Frontières** & échelle : couplage, dépendances dirigées, N+1, pagination |
+| `code-review-and-quality` | Revue finale en **5 axes** (comportement, sécurité, maintenabilité, perf, UX) |
 
-### 🤖 Sous-agents (`agents/`)
+### 🤖 Sous-agents
 
 | Agent | Rôle |
 |-------|------|
@@ -31,83 +85,79 @@ Configuration **globale** de [Claude Code](https://docs.claude.com/en/docs/claud
 | `mobile-preview` | **Dev mobile** : boot simulateur/émulateur (Expo / RN) + **screenshot-preuve** (jamais commitée) |
 | `store-deployer` | **Soumet l'app aux stores** (Google Play / App Store) via EAS Submit |
 
-### ⚡ Commandes (`commands/`)
+### ⚡ Commandes
 
 | Commande | Rôle |
 |----------|------|
 | `/flow <demande>` | Orchestrateur : plan, branche, PR, exécution TDD par tranches |
 
-`/flow` accepte aussi une **référence Linear** (`ABC-123` ou URL `linear.app/.../issue/...`) comme source du plan, via l'agent `linear` (nécessite un connecteur MCP Linear ; sinon repli en mode texte). Voir `rules/flow.md`.
+`/flow` accepte aussi une **référence Linear** (`ABC-123` ou URL `linear.app/.../issue/...`) comme source du plan, via l'agent `linear` (nécessite un connecteur MCP Linear ; sinon repli en mode texte). Voir la skill `flow-pipeline`.
 
-### 🛡️ Hooks (`hooks/`) — garde-fous d'enforcement
+### 🛡️ Garde-fous — hooks `PreToolUse`
 
-Hooks `PreToolUse` qui transforment des **règles** de `flow.md` en **blocages** réels (sortie `permissionDecision: deny`). Scripts shell autonomes, sans dépendance forte (`jq`, sinon `python3` ; **fail-open** si aucun n'est présent — jamais de workflow cassé).
+Ils transforment des **règles** de `flow-pipeline` en **blocages** réels (sortie `permissionDecision: deny`). Livrés et câblés **par le plugin** : plus rien à ajouter dans ton `settings.json`, ils s'activent avec le plugin.
 
-| Hook | Bloque | Règle source |
-|------|--------|--------------|
-| `guard-git-add.sh` | `git add -A` / `--all` / `.` | staging ciblé (`flow.md`) |
-| `guard-git-push.sh` | `git push --force` / `--force-with-lease` | pas de force-push sans accord (`flow.md`) |
-| `guard-plan-file.sh` | écrire `plan.json` / `plan.yaml` / `plan.yml` | pas de fichier de plan versionné (`flow.md`) |
+| Garde | Bloque | Règle source |
+|-------|--------|--------------|
+| `guard-git-add.sh` | `git add -A` / `--all` / `.` | staging ciblé |
+| `guard-git-push.sh` | `git push --force` / `--force-with-lease` | pas de force-push sans accord |
+| `guard-plan-file.sh` | écrire `plan.json` / `plan.yaml` / `plan.yml` | pas de fichier de plan versionné |
 
-Chaque garde a un test AAA (`*.test.sh`, cas bloqué + cas passant) qui **reste dans le repo** et n'est pas déployé. Lancer : `bash hooks/<nom>.test.sh`.
+Chaque garde a un test AAA (`*.test.sh`, cas bloqué + cas passant) qui reste dans le repo. Lancer : `bash plugins/dev-methodology/hooks/<nom>.test.sh`.
 
-## Installation
+> **Prérequis, y compris Windows.** Les gardes sont des scripts bash qui parsent le JSON du hook avec `jq`, sinon `python3`. Aucun des deux n'est fourni avec Claude Code. Sans l'un d'eux, ou sans `bash` accessible sur Windows (Git Bash / WSL), les gardes **laissent passer** plutôt que de casser ton workflow — mais ils **l'écrivent sur stderr au premier appel**, une fois par session. Un garde muet serait pire que pas de garde : l'équipe se croirait protégée.
+
+## Structure du repo
+
+```
+.claude-plugin/marketplace.json   ← la marketplace
+plugins/dev-methodology/
+├── .claude-plugin/plugin.json    ← le manifeste du plugin
+├── skills/<nom>/SKILL.md         ← une règle = une skill
+├── agents/<nom>.md               ← auto-découverts
+├── commands/flow.md              ← auto-découverte
+└── hooks/
+    ├── hooks.json                ← déclare SessionStart + les 3 gardes PreToolUse
+    ├── methodology-index.md      ← l'index injecté (éditer ici)
+    ├── _lib.sh                   ← helpers partagés des gardes
+    ├── guard-*.sh                ← les gardes
+    └── *.test.sh                 ← leurs tests (restent dans le repo)
+```
+
+Le hook `SessionStart` est un simple `cat` de l'index : c'est l'un des trois événements où le **stdout brut** est ajouté au contexte, donc aucun script ni runtime n'est nécessaire. `cat` existe aussi bien dans bash que dans PowerShell (alias de `Get-Content`), ce qui couvre macOS, Linux et Windows.
+
+## Workflow de modification
+
+1. **Édite dans ce repo**, sur une branche
+2. `claude plugin validate .` si le CLI est installé
+3. PR → merge sur `main`
+4. Côté équipe, la mise à jour arrive via `/plugin marketplace update claude-config`
+
+`plugin.json` ne déclare **pas** de `version` : c'est volontaire. Sans ce champ, chaque commit compte comme une nouvelle version et les mises à jour partent toutes seules. Si tu l'ajoutes, il faudra le **bumper à chaque release**, sinon l'équipe ne recevra plus rien silencieusement.
+
+Pour tester en local avant de pousser, ajoute le repo comme marketplace par chemin :
+
+```
+/plugin marketplace add ./chemin/vers/claude-config
+```
+
+Avant de pousser, lancer les tests des gardes :
 
 ```bash
-# macOS / Linux
-./install.sh
-
-# Windows (PowerShell)
-.\install.ps1
+for t in plugins/dev-methodology/hooks/*.test.sh; do bash "$t" || echo "ÉCHEC: $t"; done
 ```
-
-Installe `commands/`, `agents/`, `rules/` et `hooks/` dans `~/.claude/` par **lien symbolique** (éditer le repo met à jour la config instantanément) ; repli automatique sur la **copie** si les liens ne sont pas supportés (Windows sans « Mode développeur » ni admin — relancer alors le script après chaque modif). `settings.json` n'est **pas** géré (perso par machine, hors repo).
-
-### Activer les hooks (une fois, opt-in)
-
-Les hooks ne se déclenchent qu'une fois **enregistrés** dans ton `settings.json` perso — le repo n'y touche pas, tu actives toi-même. Fusionne ce bloc dans `~/.claude/settings.json` :
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          { "type": "command", "command": "$HOME/.claude/hooks/guard-git-add.sh" },
-          { "type": "command", "command": "$HOME/.claude/hooks/guard-git-push.sh" }
-        ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          { "type": "command", "command": "$HOME/.claude/hooks/guard-plan-file.sh" }
-        ]
-      }
-    ]
-  }
-}
-```
-
-> Windows : les hooks `.sh` requièrent un `bash` accessible (Git Bash / WSL).
 
 ## Modèle à deux niveaux
 
 | Niveau | Emplacement | Pour quoi |
 |--------|-------------|-----------|
-| **Global** (ce repo) | `~/.claude/` | Méthodo **générique**, agnostique au projet |
+| **Global** (ce plugin) | Installé par Claude Code | Méthodo **générique**, agnostique au projet |
 | **Projet** | `<projet>/.claude/` + `CLAUDE.md` | Stack, scripts, conventions et règles **métier** propres au repo |
 
-La config projet **étend** la globale : `settings` fusionnés en cascade, agents/commandes **ajoutés** (ou surchargés par nom), `CLAUDE.md` **additif**.
-
-## Workflow de modification
-
-1. **Édite dans ce repo** — jamais `~/.claude/` directement (écrasé au prochain install)
-2. `./install.sh` pour activer
-3. Vérifie dans `~/.claude/`
-4. `git commit` ([Conventional Commits](https://www.conventionalcommits.org/)) + push
+La config projet **étend** la globale et **prime** sur elle : priorité au plus spécifique.
 
 ## Conventions
 
 - Contenu des règles/agents en **français** ; messages de commit en **anglais** (Conventional Commits).
-- **Une règle = un sujet** (SRF appliqué aux règles elles-mêmes) : pas de fichier fourre-tout.
+- **Une règle = une skill** (SRF appliqué aux règles elles-mêmes) : pas de fichier fourre-tout.
+- `settings.json` n'est **pas** géré par ce repo (perso par machine). L'activation du plugin reste un choix explicite de chaque membre.

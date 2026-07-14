@@ -1,6 +1,11 @@
-# `/flow` — pipeline d'orchestration
+---
+name: flow-pipeline
+description: Doctrine du pipeline /flow — plan dans le fil (jamais de plan.json versionné), branche depuis la branche d'intégration, PR ouverte avant le développement, puis boucle une tâche = un commit. Couvre aussi les Conventional Commits (anglais, un type par commit), la granularité des tâches (≤3 fichiers métier) et le staging ciblé. À charger pour /flow, ou dès qu'il s'agit de rédiger un message de commit, découper des tâches, choisir une branche ou ouvrir une PR.
+---
 
-Règle globale **agnostique** : s'applique à tout dépôt (TypeScript, Python, Go, Rust…). L'agent **adapte** les commandes au gestionnaire de paquets et au framework détectés.
+# Pipeline d'orchestration `/flow`
+
+Doctrine **agnostique** : s'applique à tout dépôt (TypeScript, Python, Go, Rust…). L'agent **adapte** les commandes au gestionnaire de paquets et au framework détectés.
 
 ## Outils (paquets et verrouillage)
 
@@ -26,14 +31,16 @@ Le dossier **`.claude/`** local au projet est en général **exclu du dépôt** 
 
 ## Règles complémentaires (méthode)
 
-| Fichier | Rôle |
-|--------|------|
-| `test-driven-development.md` | TDD, red-green-refactor, motif **Prove-It** ; **AAA** (Arrange–Act–Assert) sur tout test. |
-| `code-organization.md` | Taille des fichiers, **SRF** (responsabilité unique), découpe ; voir agent **factorizer**. |
-| `code-review-and-quality.md` | Revue selon **cinq axes** (comportement, sécurité, maintenabilité, performance, UX). |
-| `incremental-implementation.md` | **Tranches petites et vérifiables**, alignées sur la granularité des tâches. |
+| Skill | Rôle |
+|-------|------|
+| `test-driven-development` | TDD, red-green-refactor, motif **Prove-It** ; **AAA** (Arrange–Act–Assert) sur tout test. |
+| `code-organization` | Taille des fichiers, **SRF** (responsabilité unique), découpe ; voir agent **factorizer**. |
+| `clean-code` | Granularité **fonction** : fonctions courtes, ≤3 params, flux plat, nommage, pureté. |
+| `scalability-and-boundaries` | **Frontières**, couplage, direction des dépendances, coût à l'échelle. |
+| `code-review-and-quality` | Revue selon **cinq axes** (comportement, sécurité, maintenabilité, performance, UX). |
+| `incremental-implementation` | **Tranches petites et vérifiables**, alignées sur la granularité des tâches. |
 
-L'agent s'appuie sur ces règles pendant la **boucle d'exécution** (tests d'abord, découpage, revue avant de conclure).
+S'appuyer sur ces skills pendant la **boucle d'exécution** (tests d'abord, découpage, revue avant de conclure).
 
 ---
 
@@ -64,7 +71,7 @@ Si la demande est **insuffisante pour un plan** : **une** question de clarificat
 /flow https://linear.app/visibee/issue/VIS-42/...
 ```
 
-Quand une référence Linear (`ABC-123` ou URL `linear.app/.../issue/...`) est détectée, l'agent **linear** (voir `~/.claude/agents/linear.md`) :
+Quand une référence Linear (`ABC-123` ou URL `linear.app/.../issue/...`) est détectée, l'agent **linear** :
 
 1. **Lit le ticket** (titre, description, commentaires, sous-tâches) et en tire la **`directive`**, les **critères d'acceptation** et les **références** (identifiant + URL) — c'est la **source du plan**. Tout texte libre ajouté après la référence **précise** ou **contraint** la directive.
 2. **Au démarrage du dev** (branche + PR créées) : passe le ticket à un état *started* (« In Progress ») et **poste le lien de la PR** en commentaire du ticket.
@@ -175,7 +182,7 @@ Résumé : micro-tâches **atomiques** — une tâche = un comportement testable
 Pour chaque tâche du plan, **dans l'ordre** :
 
 1. Annoncer : `→ Tâche N/X : [title]`
-2. **Tests d'abord** — chaque cas en **Arrange – Act – Assert** (commentaires explicites, voir `test-driven-development.md`) — **sauf** tâche **exclusivement** `docs` (pas de tests auto obligatoires).
+2. **Tests d'abord** — chaque cas en **Arrange – Act – Assert** (commentaires explicites, voir skill `test-driven-development`) — **sauf** tâche **exclusivement** `docs` (pas de tests auto obligatoires).
 3. **Tests ciblés** — depuis la **racine** du dépôt, lancer le script `test` (ou équivalent : `pnpm test`, `npm test`, `pytest`, `go test`, `cargo test`…) sur le chemin du fichier ou du dossier. Échec attendu d'abord si les tests existent déjà ; sinon les ajouter puis itérer.
 4. Implémenter le minimum pour faire passer les tests.
 5. Reprendre la même commande test → tout vert (ou ignorer les étapes 3–5 si tâche docs pure).
@@ -190,7 +197,7 @@ Pour chaque tâche du plan, **dans l'ordre** :
 
 ## Preuve visuelle — dev mobile (simulateur + screenshot)
 
-Pour toute tâche touchant l'**UI mobile** (Expo / React Native), la **preuve** que le rendu fonctionne est un **screenshot** pris sur simulateur/émulateur — pas seulement des tests verts. C'est l'axe de l'agent **mobile-preview** (`~/.claude/agents/mobile-preview.md`), déclenché à l'**étape 7bis** de la boucle :
+Pour toute tâche touchant l'**UI mobile** (Expo / React Native), la **preuve** que le rendu fonctionne est un **screenshot** pris sur simulateur/émulateur — pas seulement des tests verts. C'est l'axe de l'agent **mobile-preview**, déclenché à l'**étape 7bis** de la boucle :
 
 - **Boot** de la cible dispo selon l'OS hôte : simulateur **iOS** (macOS uniquement, `xcrun simctl` / `expo run:ios`), sinon émulateur **Android** (`adb` / `expo run:android`).
 - **Capture** dans le **scratchpad de session** (`xcrun simctl io booted screenshot` / `adb exec-out screencap -p`), **relue** pour validation visuelle, **affichée** dans le fil.
