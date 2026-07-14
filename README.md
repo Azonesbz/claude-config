@@ -8,7 +8,9 @@ Marketplace **privée** de plugins [Claude Code](https://docs.claude.com/en/docs
 
 L'ancien `install.sh` **installait** `rules/`, `agents/`, `commands/` et `hooks/` dans `~/.claude/` sans jamais rien supprimer. Ces copies sont toujours là, **figées** à leur version du jour de l'install, et Claude Code charge `~/.claude/rules/` **d'office dans chaque session**.
 
-Si tu installes le plugin sans nettoyer, tout tourne **en double** : les 7 anciennes règles chargées en permanence (~10k tokens) *plus* l'index du plugin *plus* la skill ; les gardes de `~/.claude/hooks/` *plus* ceux du plugin. Le bénéfice du plugin est annulé, la version qui s'applique est l'ancienne, et **rien ne te le signale** — l'install a l'air réussie.
+Si tu installes le plugin sans nettoyer, tout tourne **en double** : les 7 anciennes règles chargées en permanence (~10k tokens) *plus* l'index du plugin *plus* la skill ; les gardes de `~/.claude/hooks/` *plus* ceux du plugin. Le bénéfice du plugin est annulé, et la version qui s'applique est l'**ancienne**.
+
+**Le plugin te le signale.** Un hook `SessionStart` (`check-legacy-install.sh`) cherche ces restes à chaque démarrage de session et, s'il en trouve, ouvre la session par une alerte qui les **liste nommément**. Tu n'as donc rien à vérifier à la main : installe, et applique ce qui suit **si** l'alerte tombe. Cette section est le mode d'emploi — elle n'est plus ce qui te protège.
 
 **1. Supprimer les fichiers déployés**
 
@@ -117,14 +119,18 @@ plugins/dev-methodology/
 ├── agents/<nom>.md               ← auto-découverts
 ├── commands/flow.md              ← auto-découverte
 └── hooks/
-    ├── hooks.json                ← déclare SessionStart + les 3 gardes PreToolUse
+    ├── hooks.json                ← déclare les 2 SessionStart + les 3 gardes PreToolUse
     ├── methodology-index.md      ← l'index injecté (éditer ici)
     ├── _lib.sh                   ← helpers partagés des gardes
     ├── guard-*.sh                ← les gardes
+    ├── check-legacy-install.sh   ← alerte si install.sh a laissé des restes
     └── *.test.sh                 ← leurs tests (restent dans le repo)
 ```
 
-Le hook `SessionStart` est un simple `cat` de l'index : c'est l'un des trois événements où le **stdout brut** est ajouté au contexte, donc aucun script ni runtime n'est nécessaire. `cat` existe aussi bien dans bash que dans PowerShell (alias de `Get-Content`), ce qui couvre macOS, Linux et Windows.
+Les deux hooks `SessionStart` écrivent sur **stdout** : c'est l'un des trois événements où le stdout brut est ajouté au contexte, donc rien n'a besoin d'être parsé.
+
+- **L'index** est un simple `cat`, sans logique — `cat` existe aussi bien dans bash que dans PowerShell (alias de `Get-Content`), ce qui couvre macOS, Linux et Windows.
+- **Le détecteur de restes** teste des chemins, donc il lui faut bash (`shell: "bash"`). Sans bash accessible sous Windows, il ne tourne pas — mais ces machines-là ont déjà les gardes inactifs pour la même raison : on ne dégrade rien, on couvre le reste de l'équipe.
 
 ## Workflow de modification
 
