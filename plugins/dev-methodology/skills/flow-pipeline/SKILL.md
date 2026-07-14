@@ -57,7 +57,27 @@ S'appuyer sur ces skills pendant la **boucle d'exécution** (tests d'abord, déc
 
 Si la demande est **insuffisante pour un plan** : **une** question de clarification courte ; pas de taxonomie imposée à l'utilisateur.
 
-**Après le plan** : attendre explicitement **`ok`** ou **`go`** avant toute suite (branche, PR, puis développement).
+**Après le plan** : **démarrer directement** la suite (branche, PR, puis développement) — **jamais** de confirmation `ok` / `go` / « je continue ? », ni d'aval implicite attendu. Le plan est affiché pour transparence et traçabilité ; l'utilisateur peut interrompre ou corriger à tout moment. **Seule exception** (dernier recours, rare) : si la demande est **inactionnable** telle quelle (impossible d'en tirer un plan fiable), poser **une** question courte, **une** seule, puis enchaîner sur la réponse. En cas de doute qui n'empêche pas d'avancer : **choisir l'option la plus raisonnable**, l'indiquer en une ligne, et continuer.
+
+---
+
+## Source Linear (optionnel)
+
+`/flow` accepte une **référence Linear** dans la demande, en plus (ou à la place) du texte libre :
+
+```text
+/flow VIS-42
+/flow VIS-42 ne pas toucher au cache Redis
+/flow https://linear.app/visibee/issue/VIS-42/...
+```
+
+Quand une référence Linear (`ABC-123` ou URL `linear.app/.../issue/...`) est détectée, l'agent **linear** :
+
+1. **Lit le ticket** (titre, description, commentaires, sous-tâches) et en tire la **`directive`**, les **critères d'acceptation** et les **références** (identifiant + URL) — c'est la **source du plan**. Tout texte libre ajouté après la référence **précise** ou **contraint** la directive.
+2. **Au démarrage du dev** (branche + PR créées) : passe le ticket à un état *started* (« In Progress ») et **poste le lien de la PR** en commentaire du ticket.
+3. **En fin de cycle** : propose de passer le ticket à « In Review » / « Done » — **état terminal uniquement sur accord explicite**.
+
+**Prérequis** : un connecteur **MCP Linear** doit être configuré dans la session Claude Code. À défaut, `/flow` continue en **mode normal** (la demande texte sert de directive) et le signale en une phrase. Les **commits et la PR** restent en anglais (footer `Refs: ABC-123` recommandé) ; les **commentaires Linear** peuvent rester en français.
 
 ---
 
@@ -70,9 +90,9 @@ Si la demande est **insuffisante pour un plan** : **une** question de clarificat
 
 **Interdit** : ouvrir une PR vers `main` quand une branche d'intégration intermédiaire (`dev`, `develop`) existe.
 
-**Ordre imposé** : la **pull request est ouverte avant le développement et les tests** (dès que le plan est validé), pas après la dernière tâche. Les commits et pushes suivants **mettent à jour** cette PR.
+**Ordre imposé** : la **pull request est ouverte avant le développement et les tests** (dès que le plan est affiché), pas après la dernière tâche. Les commits et pushes suivants **mettent à jour** cette PR.
 
-1. **Après `ok` / `go`** : partir d'une branche d'intégration **à jour** (`git fetch`, checkout, pull), puis créer une **branche** dédiée (ex. `feat/<sujet-court-kebab>`, `fix/<sujet-court-kebab>` — **déduit** du plan dans le fil). Ne pas committer directement sur la branche d'intégration / release sans accord.
+1. **Dès le plan affiché** (sans attendre `ok` / `go`) : partir d'une branche d'intégration **à jour** (`git fetch`, checkout, pull), puis créer une **branche** dédiée (ex. `feat/<sujet-court-kebab>`, `fix/<sujet-court-kebab>` — **déduit** du plan dans le fil). Ne pas committer directement sur la branche d'intégration / release sans accord.
 2. **Pousser la branche** pour pouvoir ouvrir la PR : **commit vide** `git commit --allow-empty -m "chore: open PR for /flow workflow"` (ou équivalent d'équipe) — **sans** aucun fichier de plan. Puis `git push -u origin <branche>`.
 3. **Ouvrir tout de suite la PR** vers la branche d'intégration : titre et description **alignés sur la `directive`** (résumé du plan, périmètre). **`gh pr create --base <integration-branch>`** ; **recommandé** : `--draft` tant que le travail n'est pas prêt à review. Sinon : lien de comparaison GitHub/GitLab avec la bonne base.
 4. **Ensuite seulement** : boucle **tâches** (tests, implémentation, commits) — chaque commit reste sur **cette** branche ; **push après chaque commit** (la PR se met à jour automatiquement).
@@ -84,7 +104,7 @@ Si la demande est **insuffisante pour un plan** : **une** question de clarificat
 
 Le workflow s'active lorsque l'utilisateur utilise la **commande `/flow`** avec un **texte de demande** (éventuellement sur les lignes suivantes du même envoi).
 
-→ Plan (fil) → **`ok` / `go`** → branche depuis la branche d'intégration → **PR vers cette branche** → développement & tests (tâches).
+→ Plan (fil) → branche depuis la branche d'intégration → **PR vers cette branche** → développement & tests (tâches). **Pas d'attente de `ok` / `go`** ; seule exception, une question courte si la demande est trop ambiguë.
 
 ## Périmètre du dépôt (`perimeter.areas`)
 
@@ -130,7 +150,7 @@ Avant toute implémentation, **présenter le plan structuré dans la conversatio
 
 **Découpage** : préférer **plusieurs petites tâches** à une grosse (voir **Granularité**). Aucun export JSON obligatoire ; si un gabarit aide l'utilisateur, le montrer **en bloc de code dans le chat** seulement.
 
-Champ optionnel dans le fil : **`branch`** — nom de branche prévu pour la PR ; fixé dès le plan validé.
+Champ optionnel dans le fil : **`branch`** — nom de branche prévu pour la PR ; fixé dès le plan affiché.
 
 ## Granularité des tâches et des commits
 
@@ -150,11 +170,9 @@ Objectif : **revue et rollback faciles**, un problème par tâche.
 
 Résumé : micro-tâches **atomiques** — une tâche = un comportement testable = **un commit** (sauf tâche **exclusivement** `docs` sans code testable).
 
-- Afficher le plan et attendre **`ok`** ou **`go`**.
-
 ## Étape 1bis — Pull request (avant dev & tests)
 
-**Uniquement après `ok` / `go`**, et **avant** la première itération de la boucle ci-dessous :
+**Dès le plan affiché** (sans attendre `ok` / `go`), et **avant** la première itération de la boucle ci-dessous :
 
 1. Branche d'intégration à jour → création de la branche du plan → push initial (voir section **Pull request**).
 2. **Ouvrir la PR** vers la branche d'intégration (`gh pr create --base <integration>`, idéalement en **draft**).
@@ -170,11 +188,29 @@ Pour chaque tâche du plan, **dans l'ordre** :
 5. Reprendre la même commande test → tout vert (ou ignorer les étapes 3–5 si tâche docs pure).
 6. **Type-check** : commande adaptée (`npx tsc --noEmit`, `mypy`, `go vet`, `cargo check`…) selon l'écosystème ; zéro erreur avant commit.
 7. **Recommandé** : `lint` du projet (script `lint` du `package.json`, `ruff`, `clippy`, etc.), sauf tâche uniquement `docs` sans autre fichier code.
+7bis. **Preuve visuelle — tâches UI mobile uniquement** : si la tâche touche un **écran / composant / navigation mobile** (Expo / React Native), déléguer à l'agent **mobile-preview** (Agent tool, `subagent_type="mobile-preview"`) pour **booter un simulateur/émulateur**, ouvrir l'écran concerné et **capturer un screenshot**. La capture est affichée dans le fil (et attachée au ticket Linear si c'est la source) — **jamais commitée**. Étape **best-effort** : un échec d'environnement (pas de simulateur) est signalé mais **ne bloque pas** le commit. Ignorer pour toute tâche non visuelle (logique pure, config, docs).
 8. **Mettre à jour le plan dans le fil** : tâche courante `status` **`pending` → `done`**. Puis `git add` **ciblé** (chemins `files` + le **lock** des dépendances uniquement s'il a changé), puis `git commit -m "<commit de la tâche>"` (message **Conventional Commits**).
 9. `git push` vers **`origin`** sur la **branche courante** (`HEAD`). Si pas d'upstream : `git push -u origin <nom-de-branche>`.
 10. **Terminé** — tâche N commitée et poussée ; passage à N+1.
 
-**Fin de cycle `/flow`** : la PR existe **déjà** ; après la dernière tâche, **finaliser** (retirer le draft si besoin, compléter la description : **`directive`**, `perimeter.areas`, tests manuels, risques).
+**Fin de cycle `/flow`** : la PR existe **déjà** ; après la dernière tâche, lancer **automatiquement** (sans confirmation) la **passe qualité finale** ci-dessous, puis **finaliser** (retirer le draft si besoin, compléter la description : **`directive`**, `perimeter.areas`, tests manuels, risques, **preuve visuelle mobile** le cas échéant).
+
+## Preuve visuelle — dev mobile (simulateur + screenshot)
+
+Pour toute tâche touchant l'**UI mobile** (Expo / React Native), la **preuve** que le rendu fonctionne est un **screenshot** pris sur simulateur/émulateur — pas seulement des tests verts. C'est l'axe de l'agent **mobile-preview**, déclenché à l'**étape 7bis** de la boucle :
+
+- **Boot** de la cible dispo selon l'OS hôte : simulateur **iOS** (macOS uniquement, `xcrun simctl` / `expo run:ios`), sinon émulateur **Android** (`adb` / `expo run:android`).
+- **Capture** dans le **scratchpad de session** (`xcrun simctl io booted screenshot` / `adb exec-out screencap -p`), **relue** pour validation visuelle, **affichée** dans le fil.
+- **Jamais commitée** : ni le screenshot, ni les artefacts de build (`.ipa` / `.apk`). Source **Linear** → l'agent **linear** l'attache au ticket.
+- **Best-effort** : absence de simulateur = preuve « non capturée », **sans bloquer** le flux.
+
+## Passe qualité finale (automatique, sans confirmation)
+
+Avant de retirer le draft de la PR, exécuter **sans demander d'aval** (c'est de la vérification interne, pas de la friction utilisateur) :
+
+1. **Revue cinq axes** (`code-review-and-quality.md`) sur le diff cumulé de la branche : comportement, sécurité, maintenabilité, performance, UX. Toute case « non » → corriger (tâche/commit dédié) **ou** la justifier explicitement dans la description de PR (risque accepté / follow-up).
+2. **Agent verifier** (`subagent_type="verifier"`) : rapport succès / incomplet ; tests + lint + build relancés une dernière fois à la racine.
+3. **UI mobile** : confirmer qu'au moins **une preuve visuelle** (agent **mobile-preview**) couvre les écrans modifiés — sinon la produire maintenant.
 
 ## Règles absolues
 

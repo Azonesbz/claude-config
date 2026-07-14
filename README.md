@@ -6,24 +6,30 @@ Marketplace **privée** de plugins [Claude Code](https://docs.claude.com/en/docs
 
 ## ⚠️ Migration — à faire d'abord si tu as déjà lancé `install.sh`
 
-L'ancien `install.sh` **copiait** `rules/`, `agents/` et `commands/` dans `~/.claude/` sans jamais rien supprimer. Ces copies sont toujours là, **figées** à la version d'avant la migration, et Claude Code charge `~/.claude/rules/` **d'office dans chaque session**.
+L'ancien `install.sh` **installait** `rules/`, `agents/`, `commands/` et `hooks/` dans `~/.claude/` sans jamais rien supprimer. Ces copies sont toujours là, **figées** à leur version du jour de l'install, et Claude Code charge `~/.claude/rules/` **d'office dans chaque session**.
 
-Si tu installes le plugin sans nettoyer, tu obtiens la méthodo **en double** : les 7 anciennes règles toujours chargées en permanence (~10k tokens), plus l'index du plugin, plus la skill quand elle se charge. Le bénéfice du plugin est annulé, et **rien ne te le signale** — l'install a l'air réussie.
+Si tu installes le plugin sans nettoyer, tout tourne **en double** : les 7 anciennes règles chargées en permanence (~10k tokens) *plus* l'index du plugin *plus* la skill ; les gardes de `~/.claude/hooks/` *plus* ceux du plugin. Le bénéfice du plugin est annulé, la version qui s'applique est l'ancienne, et **rien ne te le signale** — l'install a l'air réussie.
+
+**1. Supprimer les fichiers déployés**
 
 ```bash
 # macOS / Linux
-rm -rf ~/.claude/rules
+rm -rf ~/.claude/rules ~/.claude/hooks
 rm -f ~/.claude/commands/flow.md
-rm -f ~/.claude/agents/{conventional-commit,factorizer,test-builder,test-runner,verifier}.md
+rm -f ~/.claude/agents/{conventional-commit,factorizer,test-builder,test-runner,verifier,linear,mobile-preview,store-deployer}.md
 ```
 
 ```powershell
 # Windows (PowerShell)
-Remove-Item -Recurse -Force ~/.claude/rules
+Remove-Item -Recurse -Force ~/.claude/rules, ~/.claude/hooks
 Remove-Item -Force ~/.claude/commands/flow.md
-'conventional-commit','factorizer','test-builder','test-runner','verifier' |
-  ForEach-Object { Remove-Item -Force "~/.claude/agents/$_.md" }
+'conventional-commit','factorizer','test-builder','test-runner','verifier','linear','mobile-preview','store-deployer' |
+  ForEach-Object { Remove-Item -Force "~/.claude/agents/$_.md" -ErrorAction SilentlyContinue }
 ```
+
+**2. Décâbler les gardes de ton `settings.json`**
+
+Le plugin les câble désormais lui-même. Retire de `~/.claude/settings.json` le bloc `hooks.PreToolUse` qui pointe vers `~/.claude/hooks/guard-*.sh` — sinon les gardes tournent deux fois, et ceux qui répondent sont les copies périmées. Le reste du fichier (`permissions`, etc.) ne bouge pas : ce repo ne gère pas ton `settings.json`.
 
 Rien n'est perdu : ces fichiers sont l'ancien contenu de ce repo, récupérable dans l'historique git. À faire **sur chaque machine** ayant lancé `install.sh`.
 
@@ -70,17 +76,36 @@ Chargées **à la demande**, quand la règle sert. Un hook `SessionStart` inject
 
 | Agent | Rôle |
 |-------|------|
+| `linear` | **Pont ticket Linear ↔ plan** : lit le ticket source, met à jour le statut, poste le lien de la PR |
 | `factorizer` | **Découpe** les fichiers trop gros (≤100 l., 1 module = 1 responsabilité) |
 | `test-builder` | Écrit les **tests avant** le code (TDD) |
 | `test-runner` | **Lance et diagnostique** la suite de tests |
 | `verifier` | **Rapport de fin de tâche** : demandé vs livré |
 | `conventional-commit` | Messages **Conventional Commits**, commit + push prudent |
+| `mobile-preview` | **Dev mobile** : boot simulateur/émulateur (Expo / RN) + **screenshot-preuve** (jamais commitée) |
+| `store-deployer` | **Soumet l'app aux stores** (Google Play / App Store) via EAS Submit |
 
 ### ⚡ Commandes
 
 | Commande | Rôle |
 |----------|------|
 | `/flow <demande>` | Orchestrateur : plan, branche, PR, exécution TDD par tranches |
+
+`/flow` accepte aussi une **référence Linear** (`ABC-123` ou URL `linear.app/.../issue/...`) comme source du plan, via l'agent `linear` (nécessite un connecteur MCP Linear ; sinon repli en mode texte). Voir la skill `flow-pipeline`.
+
+### 🛡️ Garde-fous — hooks `PreToolUse`
+
+Ils transforment des **règles** de `flow-pipeline` en **blocages** réels (sortie `permissionDecision: deny`). Livrés et câblés **par le plugin** : plus rien à ajouter dans ton `settings.json`, ils s'activent avec le plugin.
+
+| Garde | Bloque | Règle source |
+|-------|--------|--------------|
+| `guard-git-add.sh` | `git add -A` / `--all` / `.` | staging ciblé |
+| `guard-git-push.sh` | `git push --force` / `--force-with-lease` | pas de force-push sans accord |
+| `guard-plan-file.sh` | écrire `plan.json` / `plan.yaml` / `plan.yml` | pas de fichier de plan versionné |
+
+Chaque garde a un test AAA (`*.test.sh`, cas bloqué + cas passant) qui reste dans le repo. Lancer : `bash plugins/dev-methodology/hooks/<nom>.test.sh`.
+
+> **Prérequis, y compris Windows.** Les gardes sont des scripts bash qui parsent le JSON du hook avec `jq`, sinon `python3`. Aucun des deux n'est fourni avec Claude Code. Sans l'un d'eux, ou sans `bash` accessible sur Windows (Git Bash / WSL), les gardes **laissent passer** plutôt que de casser ton workflow — mais ils **l'écrivent sur stderr au premier appel**, une fois par session. Un garde muet serait pire que pas de garde : l'équipe se croirait protégée.
 
 ## Structure du repo
 
@@ -92,11 +117,14 @@ plugins/dev-methodology/
 ├── agents/<nom>.md               ← auto-découverts
 ├── commands/flow.md              ← auto-découverte
 └── hooks/
-    ├── hooks.json                ← déclare le hook SessionStart
-    └── methodology-index.md      ← l'index injecté (éditer ici)
+    ├── hooks.json                ← déclare SessionStart + les 3 gardes PreToolUse
+    ├── methodology-index.md      ← l'index injecté (éditer ici)
+    ├── _lib.sh                   ← helpers partagés des gardes
+    ├── guard-*.sh                ← les gardes
+    └── *.test.sh                 ← leurs tests (restent dans le repo)
 ```
 
-Le hook est un simple `cat` de l'index : `SessionStart` est l'un des trois événements où le **stdout brut** est ajouté au contexte, donc aucun script ni runtime n'est nécessaire. `cat` existe aussi bien dans bash que dans PowerShell (alias de `Get-Content`), ce qui couvre macOS, Linux et Windows.
+Le hook `SessionStart` est un simple `cat` de l'index : c'est l'un des trois événements où le **stdout brut** est ajouté au contexte, donc aucun script ni runtime n'est nécessaire. `cat` existe aussi bien dans bash que dans PowerShell (alias de `Get-Content`), ce qui couvre macOS, Linux et Windows.
 
 ## Workflow de modification
 
@@ -111,6 +139,12 @@ Pour tester en local avant de pousser, ajoute le repo comme marketplace par chem
 
 ```
 /plugin marketplace add ./chemin/vers/claude-config
+```
+
+Avant de pousser, lancer les tests des gardes :
+
+```bash
+for t in plugins/dev-methodology/hooks/*.test.sh; do bash "$t" || echo "ÉCHEC: $t"; done
 ```
 
 ## Modèle à deux niveaux
