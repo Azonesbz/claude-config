@@ -105,7 +105,7 @@ Ils transforment des **règles** de `flow-pipeline` en **blocages** réels (sort
 
 Chaque garde a un test AAA (`*.test.sh`, cas bloqué + cas passant) qui reste dans le repo. Lancer : `bash plugins/dev-methodology/hooks/<nom>.test.sh`.
 
-> **Prérequis, y compris Windows.** Les gardes sont des scripts bash qui parsent le JSON du hook avec `jq`, sinon `python3`. Aucun des deux n'est fourni avec Claude Code. Sans l'un d'eux, ou sans `bash` accessible sur Windows (Git Bash / WSL), les gardes **laissent passer** plutôt que de casser ton workflow — mais ils **l'écrivent sur stderr au premier appel**, une fois par session. Un garde muet serait pire que pas de garde : l'équipe se croirait protégée.
+> **Prérequis, y compris Windows.** Les gardes sont des scripts bash qui parsent le JSON du hook avec `jq`, sinon Python 3 — cherché sous `python3` **puis** `python`, parce que l'installeur Windows ne pose que le second. Aucun des deux n'est fourni avec Claude Code. Sans l'un d'eux, ou sans `bash` accessible sur Windows (Git Bash / WSL), les gardes **laissent passer** plutôt que de casser ton workflow — mais ils **l'écrivent sur stderr au premier appel**, une fois par session. Un garde muet serait pire que pas de garde : l'équipe se croirait protégée.
 
 ## Structure du repo
 
