@@ -1,0 +1,15 @@
+{
+  "name": "claude-config",
+  "owner": {
+    "name": "Azones",
+    "email": "vincent.avez22@gmail.com"
+  },
+  "description": "Marketplace privée : méthodologie de développement partagée par l'équipe.",
+  "plugins": [
+    {
+      "name": "dev-methodology",
+      "source": "./plugins/dev-methodology",
+      "description": "Méthodologie de dev : TDD, découpe en tranches, revue 5 axes, agents dédiés et pipeline /flow."
+    }
+  ]
+}

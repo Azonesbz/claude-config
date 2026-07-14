@@ -1,0 +1,17 @@
+{
+  "name": "dev-methodology",
+  "displayName": "Dev Methodology",
+  "version": "1.0.0",
+  "description": "Méthodologie de dev partagée : règles (TDD, clean code, frontières, revue 5 axes), agents dédiés et pipeline /flow.",
+  "author": {
+    "name": "Azones"
+  },
+  "repository": "https://github.com/Azonesbz/claude-config",
+  "keywords": [
+    "methodology",
+    "tdd",
+    "code-quality",
+    "code-review",
+    "workflow"
+  ]
+}
