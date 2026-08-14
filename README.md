@@ -1,41 +1,16 @@
 # claude-config
 
-Marketplace **privée** de plugins [Claude Code](https://docs.claude.com/en/docs/claude-code) pour l'équipe. Elle expose un plugin, **`dev-methodology`** : la méthodo de dev partagée (règles, agents, pipeline `/flow`).
+Marketplace de plugins [Claude Code](https://docs.claude.com/en/docs/claude-code). Elle expose un plugin, **`dev-methodology`** : une méthodologie de développement opinionée, livrée sous forme de règles chargées à la demande, d'agents dédiés, d'un pipeline `/flow` et de trois garde-fous qui **refusent** réellement certaines commandes.
 
-> Ce repo est la **source de vérité versionnée**. Claude Code le clone lui-même quand un membre installe le plugin — plus rien à copier à la main dans `~/.claude/`.
+Elle est publique et réutilisable telle quelle : `/plugin marketplace add Azonesbz/claude-config` suffit, sans compte ni token.
 
-## ⚠️ Migration — à faire d'abord si tu as déjà lancé `install.sh`
+> Ce repo est la **source de vérité versionnée**. Claude Code le clone lui-même à l'installation — rien à copier à la main dans `~/.claude/`.
 
-L'ancien `install.sh` **installait** `rules/`, `agents/`, `commands/` et `hooks/` dans `~/.claude/` sans jamais rien supprimer. Ces copies sont toujours là, **figées** à leur version du jour de l'install, et Claude Code charge `~/.claude/rules/` **d'office dans chaque session**.
+**Tu as déjà lancé l'ancien `install.sh` ?** Fais d'abord le [nettoyage de migration](MIGRATION.md) : sans lui, tout tourne en double et c'est l'ancienne version, figée, qui s'applique — sans que rien ne te le signale.
 
-Si tu installes le plugin sans nettoyer, tout tourne **en double** : les 7 anciennes règles chargées en permanence (~10k tokens) *plus* l'index du plugin *plus* la skill ; les gardes de `~/.claude/hooks/` *plus* ceux du plugin. Le bénéfice du plugin est annulé, la version qui s'applique est l'ancienne, et **rien ne te le signale** — l'install a l'air réussie.
+## Installation
 
-**1. Supprimer les fichiers déployés**
-
-```bash
-# macOS / Linux
-rm -rf ~/.claude/rules ~/.claude/hooks
-rm -f ~/.claude/commands/flow.md
-rm -f ~/.claude/agents/{conventional-commit,factorizer,test-builder,test-runner,verifier,linear,mobile-preview,store-deployer}.md
-```
-
-```powershell
-# Windows (PowerShell)
-Remove-Item -Recurse -Force ~/.claude/rules, ~/.claude/hooks
-Remove-Item -Force ~/.claude/commands/flow.md
-'conventional-commit','factorizer','test-builder','test-runner','verifier','linear','mobile-preview','store-deployer' |
-  ForEach-Object { Remove-Item -Force "~/.claude/agents/$_.md" -ErrorAction SilentlyContinue }
-```
-
-**2. Décâbler les gardes de ton `settings.json`**
-
-Le plugin les câble désormais lui-même. Retire de `~/.claude/settings.json` le bloc `hooks.PreToolUse` qui pointe vers `~/.claude/hooks/guard-*.sh` — sinon les gardes tournent deux fois, et ceux qui répondent sont les copies périmées. Le reste du fichier (`permissions`, etc.) ne bouge pas : ce repo ne gère pas ton `settings.json`.
-
-Rien n'est perdu : ces fichiers sont l'ancien contenu de ce repo, récupérable dans l'historique git. À faire **sur chaque machine** ayant lancé `install.sh`.
-
-## Installation (chaque membre de l'équipe)
-
-**Prérequis** : avoir accès au repo (repo privé) et être authentifié auprès de GitHub — `gh auth login`, ou une clé SSH chargée dans `ssh-agent`. Claude Code réutilise tes identifiants git existants, il n'y a **aucun token à saisir**.
+**Prérequis** : être authentifié auprès de GitHub — `gh auth login`, ou une clé SSH chargée dans `ssh-agent`. Claude Code réutilise tes identifiants git existants, il n'y a **aucun token à saisir**.
 
 Dans Claude Code :
 
@@ -105,7 +80,9 @@ Ils transforment des **règles** de `flow-pipeline` en **blocages** réels (sort
 
 Chaque garde a un test AAA (`*.test.sh`, cas bloqué + cas passant) qui reste dans le repo. Lancer : `bash plugins/dev-methodology/hooks/<nom>.test.sh`.
 
-> **Prérequis, y compris Windows.** Les gardes sont des scripts bash qui parsent le JSON du hook avec `jq`, sinon `python3`. Aucun des deux n'est fourni avec Claude Code. Sans l'un d'eux, ou sans `bash` accessible sur Windows (Git Bash / WSL), les gardes **laissent passer** plutôt que de casser ton workflow — mais ils **l'écrivent sur stderr au premier appel**, une fois par session. Un garde muet serait pire que pas de garde : l'équipe se croirait protégée.
+> **Ce que les gardes ne couvrent pas.** Ils reconnaissent une forme de commande, pas une intention. `guard-git-add.sh` refuse bien `git add -A`, mais `git commit -am`, `git add -u` et `git stage -A` **passent** — le motif ne peut structurellement pas voir un `commit -a`. De même, `guard-plan-file.sh` ne surveille que les outils `Write` et `Edit` : un `cat > plan.json` en bash n'est pas couvert, et la comparaison de nom est sensible à la casse. Ces gardes réduisent les gestes réflexes, ils ne ferment pas le sujet.
+
+> **Prérequis, y compris Windows.** Les gardes sont des scripts bash qui parsent le JSON du hook avec `jq`, sinon `python3`. Aucun des deux n'est fourni avec Claude Code. Sans l'un d'eux, ou sans `bash` accessible sur Windows (Git Bash / WSL), les gardes **laissent passer** plutôt que de casser ton workflow — mais ils **l'écrivent sur stderr au premier appel**, une fois par session. Un garde muet serait pire que pas de garde : on se croirait protégé.
 
 ## Structure du repo
 
@@ -131,9 +108,9 @@ Le hook `SessionStart` est un simple `cat` de l'index : c'est l'un des trois év
 1. **Édite dans ce repo**, sur une branche
 2. `claude plugin validate .` si le CLI est installé
 3. PR → merge sur `main`
-4. Côté équipe, la mise à jour arrive via `/plugin marketplace update claude-config`
+4. Côté utilisateur, la mise à jour arrive via `/plugin marketplace update claude-config`
 
-`plugin.json` ne déclare **pas** de `version` : c'est volontaire. Sans ce champ, chaque commit compte comme une nouvelle version et les mises à jour partent toutes seules. Si tu l'ajoutes, il faudra le **bumper à chaque release**, sinon l'équipe ne recevra plus rien silencieusement.
+`plugin.json` ne déclare **pas** de `version` : c'est volontaire. Sans ce champ, chaque commit compte comme une nouvelle version et les mises à jour partent toutes seules. Si tu l'ajoutes, il faudra le **bumper à chaque release**, sinon plus personne ne recevra rien, silencieusement.
 
 Pour tester en local avant de pousser, ajoute le repo comme marketplace par chemin :
 
@@ -160,4 +137,8 @@ La config projet **étend** la globale et **prime** sur elle : priorité au plus
 
 - Contenu des règles/agents en **français** ; messages de commit en **anglais** (Conventional Commits).
 - **Une règle = une skill** (SRF appliqué aux règles elles-mêmes) : pas de fichier fourre-tout.
-- `settings.json` n'est **pas** géré par ce repo (perso par machine). L'activation du plugin reste un choix explicite de chaque membre.
+- `settings.json` n'est **pas** géré par ce repo (perso par machine). L'activation du plugin reste un choix explicite.
+
+## Licence
+
+[MIT](LICENSE). Fork, adapte, garde ce qui te sert : ces règles sont des choix, pas des vérités — la moitié d'entre elles se discute, et c'est très bien.
