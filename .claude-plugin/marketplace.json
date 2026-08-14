@@ -4,7 +4,7 @@
     "name": "Azones",
     "email": "vincent.avez22@gmail.com"
   },
-  "description": "Marketplace privée : méthodologie de développement partagée par l'équipe.",
+  "description": "Méthodologie de développement pour Claude Code : règles, agents, pipeline /flow et garde-fous.",
   "plugins": [
     {
       "name": "dev-methodology",
