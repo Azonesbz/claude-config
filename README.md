@@ -8,6 +8,10 @@ Elle est publique et réutilisable telle quelle : `/plugin marketplace add Azone
 
 **Tu as déjà lancé l'ancien `install.sh` ?** Fais d'abord le [nettoyage de migration](MIGRATION.md) : sans lui, tout tourne en double et c'est l'ancienne version, figée, qui s'applique — sans que rien ne te le signale.
 
+---
+
+📄 **[92 % de cette méthodo ne s'exécute pas](docs/le-garde-manquant.md)** — le décompte honnête de ce qui, dans ces 1 633 lignes, refuse vraiment quelque chose : 3 règles sur 46. Avec un exercice à faire sur ton propre dépôt.
+
 ## Installation
 
 **Prérequis** : être authentifié auprès de GitHub — `gh auth login`, ou une clé SSH chargée dans `ssh-agent`. Claude Code réutilise tes identifiants git existants, il n'y a **aucun token à saisir**.
