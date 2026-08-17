@@ -16,6 +16,6 @@ Plugin `lp-builder`. Ces règles s'appliquent à **tout travail de landing page*
 
 - Une règle propre au dépôt (`.claude/rules/`, `CLAUDE.md`) **prime** sur ces règles globales : priorité au plus spécifique.
 - **Charger la skill** avant de trancher — ce résumé ne suffit pas pour le détail.
-- Agents : `market-analyst` (blueprint 10v10), `ui-snapper` (sections depuis composants pro), `asset-curator` (assets sourcés et optimisés), `lp-reviewer` (score final).
-- Pipeline complet marché → blueprint → design → build → revue : commande `/lp <brief>`.
+- **Conduite du pipeline** : agent `lp-orchestrator` — six phases, portes de passage, feuille de chantier. Il délègue à `market-analyst` (blueprint 10v10), `ui-snapper` (sections depuis composants pro), `asset-curator` (assets sourcés et optimisés) et `lp-reviewer` (score final).
+- Point d'entrée : commande `/lp <brief>` — elle délègue à l'orchestrateur, elle ne conduit rien elle-même.
 - Le **code** produit suit la méthodo du plugin `dev-methodology` s'il est actif.

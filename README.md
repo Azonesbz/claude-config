@@ -112,24 +112,29 @@ Postulat : **un beau site qui ne vend pas ne sert à rien.** La donnée marché 
 
 | Agent | Rôle |
 |-------|------|
+| `lp-orchestrator` | **Conduit toute la pipeline** : six phases, portes de passage, feuille de chantier, boucle de correction |
 | `market-analyst` | Constitue le panel **10v10**, extrait, compare, produit le **blueprint** |
 | `ui-snapper` | Construit les sections depuis des **composants pro**, licence vérifiée, remappés sur les tokens |
 | `asset-curator` | Assets **sourcés, licenciés, optimisés** + inventaire source/licence/poids |
 | `lp-reviewer` | **Score final** avec la matrice du marché + checks mobile, poids, LCP, a11y |
 
+Chaque phase a une **porte** : pas de build sans blueprint, pas de composant sans tokens, pas de livraison sans score. Une porte non franchie se **dit** — elle ne se contourne pas en silence. La boucle de correction est bornée à **deux tours** : toujours sous la barre après ça, l'orchestrateur livre avec le score réel et ce qui l'explique, plutôt que de boucler.
+
 ### ⚡ Commande
 
 | Commande | Rôle |
 |----------|------|
-| `/lp <brief>` | Marché → blueprint → DA → build par sections → revue scorée |
+| `/lp <brief>` | Point d'entrée **fin** : délègue à `lp-orchestrator`, qui conduit marché → blueprint → DA → build → revue scorée |
 
 ### 🛡️ Garde-fou
 
 | Garde | Bloque | Règle source |
 |-------|--------|--------------|
-| `guard-placeholder-copy.sh` | Écrire du **lorem ipsum** dans un fichier | zéro contenu de démo livré |
+| `guard-placeholder-copy.sh` | Écrire du **lorem ipsum** dans un fichier de page | zéro contenu de démo livré |
 
-> **Ce que ce garde ne couvre pas.** Il reconnaît une chaîne, pas une intention. Le contenu de démo d'un composant (« Client 1 », « Jane Doe », avatars de la bibliothèque) **passe** — un motif ne peut pas distinguer un faux témoignage d'un vrai. Il attrape la forme la plus courante de remplissage, il ne garantit pas que la page contient du contenu réel : c'est le job de l'agent `lp-reviewer`.
+> **Portée du garde.** Il ne s'applique qu'aux fichiers qui **rendent quelque chose au visiteur** : `.html`, `.jsx`, `.tsx`, `.vue`, `.svelte`, `.astro` — et il s'écarte des fichiers de test, `.stories.*`, `__tests__/`, `__mocks__/`, `fixtures/`, `mocks/`. Ailleurs, le lorem ipsum est de la donnée d'exemple parfaitement légitime, et le plugin s'installe globalement : un garde non scopé refuserait d'écrire une fixture Python ou cette page même de documentation.
+
+> **Ce que ce garde ne couvre pas.** Il reconnaît une chaîne, pas une intention. Le contenu de démo d'un composant (« Client 1 », « Jane Doe », avatars de la bibliothèque) **passe** — un motif ne peut pas distinguer un faux témoignage d'un vrai. Du lorem ipsum dans un `.ts` ou un `.md` de contenu passe aussi, par choix de portée. Il attrape la forme la plus courante de remplissage, il ne garantit pas que la page contient du contenu réel : c'est le job de l'agent `lp-reviewer`.
 
 Le **code** produit suit `dev-methodology` si le plugin est actif ; sinon `lp-builder` reste autonome.
 
