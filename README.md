@@ -1,8 +1,13 @@
 # claude-config
 
-Marketplace de plugins [Claude Code](https://docs.claude.com/en/docs/claude-code). Elle expose un plugin, **`dev-methodology`** : une méthodologie de développement opinionée, livrée sous forme de règles chargées à la demande, d'agents dédiés, d'un pipeline `/flow` et de trois garde-fous qui **refusent** réellement certaines commandes.
+Marketplace de plugins [Claude Code](https://docs.claude.com/en/docs/claude-code). Elle expose deux plugins :
 
-Elle est publique et réutilisable telle quelle : `/plugin marketplace add Azonesbz/claude-config` suffit, sans compte ni token.
+| Plugin | Pour quoi |
+|--------|-----------|
+| **`dev-methodology`** | Méthodologie de développement opinionée : règles chargées à la demande, agents dédiés, pipeline `/flow` et trois garde-fous qui **refusent** réellement certaines commandes |
+| **`lp-builder`** | Création de **landing pages qui vendent** : analyse concurrentielle 10 gagnants vs 10 qui rament, blueprint de conversion, UI snapping et score final contre la barre du marché |
+
+Ils s'installent séparément et fonctionnent indépendamment. Elle est publique et réutilisable telle quelle : `/plugin marketplace add Azonesbz/claude-config` suffit, sans compte ni token.
 
 > Ce repo est la **source de vérité versionnée**. Claude Code le clone lui-même à l'installation — rien à copier à la main dans `~/.claude/`.
 
@@ -21,6 +26,7 @@ Dans Claude Code :
 ```
 /plugin marketplace add Azonesbz/claude-config
 /plugin install dev-methodology@claude-config
+/plugin install lp-builder@claude-config
 ```
 
 En SSH plutôt qu'en HTTPS :
@@ -35,7 +41,7 @@ Vérifier :
 /plugin list
 ```
 
-## Ce que le plugin apporte
+## `dev-methodology` — ce que le plugin apporte
 
 ### 📐 Règles — livrées en **skills**
 
@@ -88,10 +94,49 @@ Chaque garde a un test AAA (`*.test.sh`, cas bloqué + cas passant) qui reste da
 
 > **Prérequis, y compris Windows.** Les gardes sont des scripts bash qui parsent le JSON du hook avec `jq`, sinon `python3`. Aucun des deux n'est fourni avec Claude Code. Sans l'un d'eux, ou sans `bash` accessible sur Windows (Git Bash / WSL), les gardes **laissent passer** plutôt que de casser ton workflow — mais ils **l'écrivent sur stderr au premier appel**, une fois par session. Un garde muet serait pire que pas de garde : on se croirait protégé.
 
+## `lp-builder` — ce que le plugin apporte
+
+Postulat : **un beau site qui ne vend pas ne sert à rien.** La donnée marché précède le design, le design précède le code. La structure d'une page n'est pas un goût, elle se **dérive** de ce qui marche déjà dans la niche.
+
+### 📊 Skills
+
+| Skill | Couvre |
+|-------|--------|
+| `market-blueprint` | Analyse **10 gagnants vs 10 qui rament** → ordre des sections, plan CTA, **matrice de scoring**, placement de la preuve |
+| `conversion-anatomy` | Job de chaque section, **règle des 5 secondes**, CTA unique, objections, friction, hiérarchie |
+| `visual-references` | DA décidée avant le style : Mobbin, Land-book, Godly, Awwwards → **tokens** actionnables |
+| `ui-snapping` | Assembler depuis **21st.dev, Magic UI, shadcn/ui, Aceternity, CodePen** : licences, remapping, budget perf |
+| `asset-sourcing` | Images, vidéos, icônes, polices : licences, formats modernes, budget de poids, **LCP protégé** |
+
+### 🤖 Sous-agents
+
+| Agent | Rôle |
+|-------|------|
+| `market-analyst` | Constitue le panel **10v10**, extrait, compare, produit le **blueprint** |
+| `ui-snapper` | Construit les sections depuis des **composants pro**, licence vérifiée, remappés sur les tokens |
+| `asset-curator` | Assets **sourcés, licenciés, optimisés** + inventaire source/licence/poids |
+| `lp-reviewer` | **Score final** avec la matrice du marché + checks mobile, poids, LCP, a11y |
+
+### ⚡ Commande
+
+| Commande | Rôle |
+|----------|------|
+| `/lp <brief>` | Marché → blueprint → DA → build par sections → revue scorée |
+
+### 🛡️ Garde-fou
+
+| Garde | Bloque | Règle source |
+|-------|--------|--------------|
+| `guard-placeholder-copy.sh` | Écrire du **lorem ipsum** dans un fichier | zéro contenu de démo livré |
+
+> **Ce que ce garde ne couvre pas.** Il reconnaît une chaîne, pas une intention. Le contenu de démo d'un composant (« Client 1 », « Jane Doe », avatars de la bibliothèque) **passe** — un motif ne peut pas distinguer un faux témoignage d'un vrai. Il attrape la forme la plus courante de remplissage, il ne garantit pas que la page contient du contenu réel : c'est le job de l'agent `lp-reviewer`.
+
+Le **code** produit suit `dev-methodology` si le plugin est actif ; sinon `lp-builder` reste autonome.
+
 ## Structure du repo
 
 ```
-.claude-plugin/marketplace.json   ← la marketplace
+.claude-plugin/marketplace.json   ← la marketplace (déclare les 2 plugins)
 plugins/dev-methodology/
 ├── .claude-plugin/plugin.json    ← le manifeste du plugin
 ├── skills/<nom>/SKILL.md         ← une règle = une skill
@@ -103,6 +148,18 @@ plugins/dev-methodology/
     ├── _lib.sh                   ← helpers partagés des gardes
     ├── guard-*.sh                ← les gardes
     └── *.test.sh                 ← leurs tests (restent dans le repo)
+plugins/lp-builder/
+├── .claude-plugin/plugin.json
+├── skills/<nom>/SKILL.md         ← market-blueprint, conversion-anatomy, visual-references,
+│                                    ui-snapping, asset-sourcing
+├── agents/<nom>.md               ← market-analyst, ui-snapper, asset-curator, lp-reviewer
+├── commands/lp.md
+└── hooks/
+    ├── hooks.json                ← SessionStart + le garde placeholder
+    ├── lp-index.md               ← l'index injecté (éditer ici)
+    ├── _lib.sh
+    ├── guard-placeholder-copy.sh
+    └── guard-placeholder-copy.test.sh
 ```
 
 Le hook `SessionStart` est un simple `cat` de l'index : c'est l'un des trois événements où le **stdout brut** est ajouté au contexte, donc aucun script ni runtime n'est nécessaire. `cat` existe aussi bien dans bash que dans PowerShell (alias de `Get-Content`), ce qui couvre macOS, Linux et Windows.
@@ -122,10 +179,10 @@ Pour tester en local avant de pousser, ajoute le repo comme marketplace par chem
 /plugin marketplace add ./chemin/vers/claude-config
 ```
 
-Avant de pousser, lancer les tests des gardes :
+Avant de pousser, lancer les tests des gardes (les deux plugins) :
 
 ```bash
-for t in plugins/dev-methodology/hooks/*.test.sh; do bash "$t" || echo "ÉCHEC: $t"; done
+for t in plugins/*/hooks/*.test.sh; do bash "$t" || echo "ÉCHEC: $t"; done
 ```
 
 ## Modèle à deux niveaux
