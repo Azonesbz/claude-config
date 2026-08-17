@@ -11,9 +11,9 @@ $ARGUMENTS
 
 ## Ce que tu fais
 
-**Déléguer immédiatement à l'agent `lp-orchestrator`** (Agent tool, `subagent_type="lp-orchestrator"`) en lui passant la demande **telle quelle**. C'est lui qui conduit les six phases, tient la feuille de chantier, appelle les agents spécialisés et fait respecter les portes de passage.
+**Déléguer immédiatement à l'agent `lp-orchestrator`** (Agent tool, `subagent_type="lp-orchestrator"`) en lui passant la demande **telle quelle**. Il exécute la compétence `lp-pipeline` — sept étapes numérotées, chacune dans son fichier, lues juste avant d'être appliquées — tient la feuille de chantier et fait respecter les portes et les trois arrêts durs.
 
-Ne fais pas le travail à sa place : cette commande est une **entrée fine**, la conduite du pipeline vit dans l'agent.
+Ne fais pas le travail à sa place : cette commande est une **entrée fine**. La séquence vit dans `lp-pipeline`, sa conduite dans l'agent.
 
 Avant de déléguer, un seul contrôle : si la demande ne permet pas d'identifier l'**offre**, la **cible** ou l'**objectif de conversion**, poser **une** série courte de questions (jamais un formulaire), puis déléguer. Sinon, déléguer directement — **aucune** confirmation `ok` / `go`.
 

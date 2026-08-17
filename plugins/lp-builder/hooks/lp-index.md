@@ -16,6 +16,7 @@ Plugin `lp-builder`. Ces règles s'appliquent à **tout travail de landing page*
 
 - Une règle propre au dépôt (`.claude/rules/`, `CLAUDE.md`) **prime** sur ces règles globales : priorité au plus spécifique.
 - **Charger la skill** avant de trancher — ce résumé ne suffit pas pour le détail.
-- **Conduite du pipeline** : agent `lp-orchestrator` — six phases, portes de passage, feuille de chantier. Il délègue à `market-analyst` (blueprint 10v10), `ui-snapper` (sections depuis composants pro), `asset-curator` (assets sourcés et optimisés) et `lp-reviewer` (score final).
+- **La séquence** : compétence `lp-pipeline` — sept étapes numérotées dans `etapes/etape-NN-*.md`, lues **juste avant** d'être appliquées, jamais préchargées. Trois **arrêts durs** où seul l'utilisateur répond : cadrage (00), preuves et assets du client (04), mise en ligne (06).
+- **La conduite** : agent `lp-orchestrator` — exécute `lp-pipeline`, tient la feuille de chantier, délègue à `market-analyst` (blueprint 10v10), `ui-snapper` (sections depuis composants pro), `asset-curator` (assets sourcés et optimisés) et `lp-reviewer` (score final).
 - Point d'entrée : commande `/lp <brief>` — elle délègue à l'orchestrateur, elle ne conduit rien elle-même.
 - Le **code** produit suit la méthodo du plugin `dev-methodology` s'il est actif.

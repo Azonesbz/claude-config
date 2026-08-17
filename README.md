@@ -102,6 +102,7 @@ Postulat : **un beau site qui ne vend pas ne sert à rien.** La donnée marché 
 
 | Skill | Couvre |
 |-------|--------|
+| `lp-pipeline` | **La séquence** : sept étapes numérotées (`etapes/etape-NN-*.md`), portes de passage, trois arrêts durs |
 | `market-blueprint` | Analyse **10 gagnants vs 10 qui rament** → ordre des sections, plan CTA, **matrice de scoring**, placement de la preuve |
 | `conversion-anatomy` | Job de chaque section, **règle des 5 secondes**, CTA unique, objections, friction, hiérarchie |
 | `visual-references` | DA décidée avant le style : Mobbin, Land-book, Godly, Awwwards → **tokens** actionnables |
@@ -112,13 +113,15 @@ Postulat : **un beau site qui ne vend pas ne sert à rien.** La donnée marché 
 
 | Agent | Rôle |
 |-------|------|
-| `lp-orchestrator` | **Conduit toute la pipeline** : six phases, portes de passage, feuille de chantier, boucle de correction |
+| `lp-orchestrator` | **Exécute `lp-pipeline`** : tient la feuille de chantier, délègue, fait respecter portes et arrêts durs |
 | `market-analyst` | Constitue le panel **10v10**, extrait, compare, produit le **blueprint** |
 | `ui-snapper` | Construit les sections depuis des **composants pro**, licence vérifiée, remappés sur les tokens |
 | `asset-curator` | Assets **sourcés, licenciés, optimisés** + inventaire source/licence/poids |
 | `lp-reviewer` | **Score final** avec la matrice du marché + checks mobile, poids, LCP, a11y |
 
-Chaque phase a une **porte** : pas de build sans blueprint, pas de composant sans tokens, pas de livraison sans score. Une porte non franchie se **dit** — elle ne se contourne pas en silence. La boucle de correction est bornée à **deux tours** : toujours sous la barre après ça, l'orchestrateur livre avec le score réel et ce qui l'explique, plutôt que de boucler.
+Chaque étape a une **porte** : pas de build sans blueprint, pas de composant sans tokens, pas de livraison sans score. Une porte non franchie se **dit** — elle ne se contourne pas en silence. Les portes sont franchies seul ; les **trois arrêts durs** (cadrage, preuves du client, mise en ligne) exigent une réponse de l'utilisateur. La boucle de correction est bornée à **deux tours** : toujours sous la barre après ça, la page est livrée avec le score réel et ce qui l'explique, plutôt que de boucler.
+
+La séquence vit dans les **fichiers d'étape**, lus juste avant d'être appliqués et jamais préchargés — la convention des compétences `halo` et `lancer`. C'est aussi ce qui la rend lisible par un outil : [Atelier Claude](https://github.com/Azonesbz/atelier-claude) détecte un workflow au tableau d'étapes numérotées d'un `SKILL.md`, et affiche alors ses étapes, ses arrêts durs, les agents mobilisés et les fichiers annoncés mais absents. Un pipeline qui ne vit que dans la prose d'un agent est **invisible** pour ce genre d'inspection.
 
 ### ⚡ Commande
 
@@ -155,9 +158,13 @@ plugins/dev-methodology/
     └── *.test.sh                 ← leurs tests (restent dans le repo)
 plugins/lp-builder/
 ├── .claude-plugin/plugin.json
+├── skills/lp-pipeline/
+│   ├── SKILL.md                  ← la séquence : tableau d'étapes + arrêts durs
+│   └── etapes/etape-NN-*.md      ← une étape = un fichier, lu juste avant exécution
 ├── skills/<nom>/SKILL.md         ← market-blueprint, conversion-anatomy, visual-references,
 │                                    ui-snapping, asset-sourcing
-├── agents/<nom>.md               ← market-analyst, ui-snapper, asset-curator, lp-reviewer
+├── agents/<nom>.md               ← lp-orchestrator, market-analyst, ui-snapper,
+│                                    asset-curator, lp-reviewer
 ├── commands/lp.md                ← entrée fine : délègue à lp-orchestrator
 └── hooks/
     ├── hooks.json                ← SessionStart + le garde placeholder
