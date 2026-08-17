@@ -132,7 +132,7 @@ Chaque phase a une **porte** : pas de build sans blueprint, pas de composant san
 |-------|--------|--------------|
 | `guard-placeholder-copy.sh` | Écrire du **lorem ipsum** dans un fichier de page | zéro contenu de démo livré |
 
-> **Portée du garde.** Il ne s'applique qu'aux fichiers qui **rendent quelque chose au visiteur** : `.html`, `.jsx`, `.tsx`, `.vue`, `.svelte`, `.astro` — et il s'écarte des fichiers de test, `.stories.*`, `__tests__/`, `__mocks__/`, `fixtures/`, `mocks/`. Ailleurs, le lorem ipsum est de la donnée d'exemple parfaitement légitime, et le plugin s'installe globalement : un garde non scopé refuserait d'écrire une fixture Python ou cette page même de documentation.
+> **Portée du garde.** Il ne s'applique qu'aux fichiers qui **rendent quelque chose au visiteur** : `.html`, `.jsx`, `.tsx`, `.vue`, `.svelte`, `.astro` — et il s'écarte des fichiers de test, `.stories.*`, `__tests__/`, `__mocks__/`, `fixtures/`, `mocks/`. Ailleurs, le lorem ipsum est de la donnée d'exemple parfaitement légitime, et le plugin s'installe globalement : un garde non scopé refuserait d'écrire une fixture Python ou cette page même de documentation. Il couvre les **trois** formes d'écriture — `Write` (`content`), `Edit` (`new_string`) et `MultiEdit` (chaque entrée de `edits`).
 
 > **Ce que ce garde ne couvre pas.** Il reconnaît une chaîne, pas une intention. Le contenu de démo d'un composant (« Client 1 », « Jane Doe », avatars de la bibliothèque) **passe** — un motif ne peut pas distinguer un faux témoignage d'un vrai. Du lorem ipsum dans un `.ts` ou un `.md` de contenu passe aussi, par choix de portée. Il attrape la forme la plus courante de remplissage, il ne garantit pas que la page contient du contenu réel : c'est le job de l'agent `lp-reviewer`.
 
@@ -158,11 +158,12 @@ plugins/lp-builder/
 ├── skills/<nom>/SKILL.md         ← market-blueprint, conversion-anatomy, visual-references,
 │                                    ui-snapping, asset-sourcing
 ├── agents/<nom>.md               ← market-analyst, ui-snapper, asset-curator, lp-reviewer
-├── commands/lp.md
+├── commands/lp.md                ← entrée fine : délègue à lp-orchestrator
 └── hooks/
     ├── hooks.json                ← SessionStart + le garde placeholder
     ├── lp-index.md               ← l'index injecté (éditer ici)
-    ├── _lib.sh
+    ├── _lib.sh                   ← copie autonome (diffère par le message et le marker)
+    ├── _lib.test.sh              ← couvre le fail-open et le marker propre au plugin
     ├── guard-placeholder-copy.sh
     └── guard-placeholder-copy.test.sh
 ```
