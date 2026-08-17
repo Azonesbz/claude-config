@@ -4,12 +4,17 @@
     "name": "Azones",
     "email": "vincent.avez22@gmail.com"
   },
-  "description": "Méthodologie de développement pour Claude Code : règles, agents, pipeline /flow et garde-fous.",
+  "description": "Plugins Claude Code : méthodologie de développement (règles, agents, pipeline /flow, garde-fous) et création de landing pages qui convertissent.",
   "plugins": [
     {
       "name": "dev-methodology",
       "source": "./plugins/dev-methodology",
       "description": "Méthodologie de dev : TDD, découpe en tranches, revue 5 axes, agents dédiés et pipeline /flow."
+    },
+    {
+      "name": "lp-builder",
+      "source": "./plugins/lp-builder",
+      "description": "Landing pages qui vendent : blueprint issu d'une analyse 10 gagnants vs 10 qui rament, références visuelles, UI snapping, assets optimisés et score de conversion."
     }
   ]
 }
