@@ -39,6 +39,35 @@ check_allowed() {
     echo "FAIL: expected pass-through for ${label} (got: ${out})"; fails=$((fails + 1)); fi
 }
 
+# MultiEdit carries an array of replacements instead of a single new_string.
+multiedit_payload() {
+  local file_path="$1" first="$2" second="$3"
+  printf '{"tool_name":"MultiEdit","tool_input":{"file_path":"%s","edits":[{"old_string":"a","new_string":"%s"},{"old_string":"b","new_string":"%s"}]}}' \
+    "${file_path}" "${first}" "${second}"
+}
+
+check_multiedit_blocked() {
+  # Arrange
+  local label="$1" file_path="$2" first="$3" second="$4"
+  local input; input="$(multiedit_payload "${file_path}" "${first}" "${second}")"
+  # Act
+  local out; out="$(run_guard "${input}")"
+  # Assert
+  if is_deny "${out}"; then echo "PASS: blocked ${label}"; else
+    echo "FAIL: expected block for ${label} (got: ${out})"; fails=$((fails + 1)); fi
+}
+
+check_multiedit_allowed() {
+  # Arrange
+  local label="$1" file_path="$2" first="$3" second="$4"
+  local input; input="$(multiedit_payload "${file_path}" "${first}" "${second}")"
+  # Act
+  local out; out="$(run_guard "${input}")"
+  # Assert
+  if [ -z "${out}" ]; then echo "PASS: allowed ${label}"; else
+    echo "FAIL: expected pass-through for ${label} (got: ${out})"; fails=$((fails + 1)); fi
+}
+
 # Filler in a page file — the case this guard exists for.
 check_blocked "lorem ipsum in html"      "index.html"          "content"    "<p>Lorem ipsum dolor sit amet</p>"
 check_blocked "lowercase in a component" "src/Hero.tsx"        "content"    "lorem ipsum dolor"
@@ -63,5 +92,11 @@ check_allowed "file under fixtures dir"  "src/fixtures/hero.html" "content" "<p>
 
 # No file_path (unknown tool shape) — cannot scope, so stay out of the way.
 check_allowed "no file path"             ""                    "content"    "lorem ipsum dolor"
+
+# MultiEdit writes through an edits array — filler must not slip in that way.
+check_multiedit_blocked "filler in the first edit"  "src/Hero.tsx"  "Lorem ipsum dolor" "<h1>Vraie promesse</h1>"
+check_multiedit_blocked "filler in a later edit"    "src/Hero.tsx"  "<h1>Vraie promesse</h1>" "lorem ipsum"
+check_multiedit_allowed "real copy in every edit"   "src/Hero.tsx"  "<h1>Vraie promesse</h1>" "<p>Sans carte bancaire</p>"
+check_multiedit_allowed "filler in a test file"     "src/Hero.test.tsx" "lorem ipsum" "lorem ipsum"
 
 exit "${fails}"

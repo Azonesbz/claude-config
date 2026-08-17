@@ -24,6 +24,36 @@ print(data.get("tool_input", {}).get(sys.argv[1], ""))' "${key}"
   fi
 }
 
+# Print every replacement string of a MultiEdit call, one per line. Returns 1
+# when no JSON parser is available so the caller can fail open.
+hook_edits_text() {
+  if command -v jq >/dev/null 2>&1; then
+    printf '%s' "${HOOK_INPUT}" | jq -r '[.tool_input.edits[]?.new_string // empty] | join("\n")'
+  elif command -v python3 >/dev/null 2>&1; then
+    printf '%s' "${HOOK_INPUT}" | python3 -c 'import sys, json
+data = json.load(sys.stdin)
+edits = data.get("tool_input", {}).get("edits") or []
+print("\n".join(e.get("new_string", "") for e in edits))'
+  else
+    hook_warn_no_parser
+    return 1
+  fi
+}
+
+# Print the text a tool call would write, whichever shape it uses: Write carries
+# `content`, Edit carries `new_string`, MultiEdit carries an `edits` array.
+# Returns 1 when no JSON parser is available so the caller can fail open.
+hook_written_text() {
+  local text
+  text="$(hook_field content)" || return 1
+  if [ -n "${text}" ]; then printf '%s' "${text}"; return 0; fi
+
+  text="$(hook_field new_string)" || return 1
+  if [ -n "${text}" ]; then printf '%s' "${text}"; return 0; fi
+
+  hook_edits_text
+}
+
 # Warn once per session that the guards are inert. A marker file in the plugin's
 # persistent data dir keeps this to one line instead of one per tool call.
 hook_warn_no_parser() {
