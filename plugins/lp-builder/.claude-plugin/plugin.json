@@ -1,0 +1,17 @@
+{
+  "name": "lp-builder",
+  "displayName": "LP Builder",
+  "description": "Création de landing pages qui vendent : blueprint issu d'une analyse concurrentielle 10 gagnants vs 10 qui rament, références visuelles, UI snapping (21st.dev, Magic UI, shadcn/ui, CodePen, Mobbin), assets optimisés et revue de conversion scorée.",
+  "author": {
+    "name": "Azones"
+  },
+  "repository": "https://github.com/Azonesbz/claude-config",
+  "keywords": [
+    "landing-page",
+    "conversion",
+    "cro",
+    "ui",
+    "design",
+    "marketing"
+  ]
+}
